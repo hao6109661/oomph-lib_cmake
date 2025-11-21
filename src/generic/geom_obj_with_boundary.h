@@ -63,7 +63,7 @@ namespace oomph
   /// Class also provides broken virtual function to specify boundary triads,
   /// and various output functions.
   //===========================================================================
-  class DiskLikeGeomObjectWithBoundaries : public virtual GeomObject
+  class DiskLikeGeomObjectWithBoundaries : public GeomObject
   {
   public:
     /// Constructor
