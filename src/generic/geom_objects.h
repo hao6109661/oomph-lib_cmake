@@ -331,8 +331,8 @@ namespace oomph
       oomph_info << "The finite difference method is employed." << std::endl;
 
       // FD step
-      // For double precision, the optimal step size is 1.0e-8
-      double dzeta = 1.0e-8;
+      // For double precision, the optimal step size is 1.0e-5
+      double dzeta = 1.0e-5;
 
       // Position at the current Lagrangian coordinate
       Vector<double> r(Ndim, 0.0);
