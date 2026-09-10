@@ -363,13 +363,15 @@ namespace oomph
       // If we can't split the boundaries add the flag
       if (can_boundaries_be_split == false)
       {
-        input_string << "Y";
+        input_string << "YY";
       }
-
+      
       // Now convert to a C-style string
       char tetswitches[100];
       snprintf(
         tetswitches, sizeof(tetswitches), "%s", input_string.str().c_str());
+        
+      std::cout << "tetswitches = [" << tetswitches << "]\n";
 
       // Make a new tetgen representation
       this->Tetgenio_exists = true;

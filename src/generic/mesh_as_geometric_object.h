@@ -346,6 +346,12 @@ namespace oomph
 
     /// Broken assignment operator
     void operator=(const MeshAsGeomObject&) = delete;
+    
+    /// Access to underlying mesh
+    Mesh* mesh_pt() const
+    {
+      return Mesh_pt;
+    }
 
     /// How many items of Data does the shape of the object depend on?
     unsigned ngeom_data() const
