@@ -346,7 +346,7 @@ namespace oomph
 
     /// Broken assignment operator
     void operator=(const MeshAsGeomObject&) = delete;
-    
+
     /// Access to underlying mesh
     Mesh* mesh_pt() const
     {

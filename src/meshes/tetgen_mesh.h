@@ -365,12 +365,12 @@ namespace oomph
       {
         input_string << "YY";
       }
-      
+
       // Now convert to a C-style string
       char tetswitches[100];
       snprintf(
         tetswitches, sizeof(tetswitches), "%s", input_string.str().c_str());
-        
+
       std::cout << "tetswitches = [" << tetswitches << "]\n";
 
       // Make a new tetgen representation
