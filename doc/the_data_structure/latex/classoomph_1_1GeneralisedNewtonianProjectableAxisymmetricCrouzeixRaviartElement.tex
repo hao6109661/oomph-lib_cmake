@@ -556,10 +556,18 @@ Inheritance diagram for oomph\+::Generalised\+Newtonian\+Projectable\+Axisymmetr
 \begin{DoxyCompactList}\small\item\em Access function for pointer to time stepper\+: Null if object is not time-\/dependent. Const version. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{virtual}} \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{void}} \mbox{\hyperlink{classoomph_1_1GeomObject_af5736db11f3a40daa1a9b3d4859ca061}{position}} (\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}} \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} \&\mbox{\hyperlink{cfortran_8h_af6f0bd3dc13317f895c91323c25c2b8f}{t}}, \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}} \mbox{\hyperlink{classoomph_1_1Vector}{Vector}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{zeta}}, \mbox{\hyperlink{classoomph_1_1Vector}{Vector}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{r}}) \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}}
 \begin{DoxyCompactList}\small\item\em Parametrised position on object\+: r(zeta). Evaluated at the continuous time value, t. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} \& \mbox{\hyperlink{classoomph_1_1GeomObject_a73954a1aa1911f6b7ab6e062731df033}{first\+\_\+derivative\+\_\+fd\+\_\+step}} ()
+\begin{DoxyCompactList}\small\item\em Return a non-\/const reference to the FD step size for the first derivative, allowing modification of the value. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} \mbox{\hyperlink{classoomph_1_1GeomObject_a1515c88970b693724f6f05f8cfd93819}{first\+\_\+derivative\+\_\+fd\+\_\+step}} () \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}}
+\begin{DoxyCompactList}\small\item\em Return a const reference to the FD step size for the first derivative, providing read-\/only access. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} \& \mbox{\hyperlink{classoomph_1_1GeomObject_a233868d62dddb18051556ed13bb2b5d2}{second\+\_\+derivative\+\_\+fd\+\_\+step}} ()
+\begin{DoxyCompactList}\small\item\em Return a non-\/const reference to the FD step size for the second derivative, allowing modification of the value. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} \mbox{\hyperlink{classoomph_1_1GeomObject_ad37f9151ec8876097f48c9c260a8fd0c}{second\+\_\+derivative\+\_\+fd\+\_\+step}} () \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}}
+\begin{DoxyCompactList}\small\item\em Return a const reference to the FD step size for the second derivative, providing read-\/only access. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{virtual}} \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{void}} \mbox{\hyperlink{classoomph_1_1GeomObject_a91cd59efcb15971a293914b7b9bd7f75}{dposition}} (\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}} \mbox{\hyperlink{classoomph_1_1Vector}{Vector}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{zeta}}, \mbox{\hyperlink{classoomph_1_1DenseMatrix}{Dense\+Matrix}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{drdzeta}}) \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}}
-\begin{DoxyCompactList}\small\item\em Derivative of position \doxylink{classoomph_1_1Vector}{Vector} w.\+r.\+t. to coordinates\+: $ \frac{dR_i}{d \zeta_\alpha}$ = drdzeta(alpha,i). Evaluated at current time. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em Derivative of position \doxylink{classoomph_1_1Vector}{Vector} w.\+r.\+t. to coordinates\+: $ \frac{dR_i}{d \zeta_\alpha}$ = drdzeta(alpha,i). Evaluated at current time. By default, the finite difference method is employed. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{virtual}} \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{void}} \mbox{\hyperlink{classoomph_1_1GeomObject_a08472dbe196123490ea109762cefd00c}{d2position}} (\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}} \mbox{\hyperlink{classoomph_1_1Vector}{Vector}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{zeta}}, \mbox{\hyperlink{classoomph_1_1RankThreeTensor}{Rank\+Three\+Tensor}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{ddrdzeta}}) \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}}
-\begin{DoxyCompactList}\small\item\em 2nd derivative of position \doxylink{classoomph_1_1Vector}{Vector} w.\+r.\+t. to coordinates\+: $ \frac{d^2R_i}{d \zeta_\alpha d \zeta_\beta}$ = ddrdzeta(alpha,beta,i). Evaluated at current time. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em 2nd derivative of position \doxylink{classoomph_1_1Vector}{Vector} w.\+r.\+t. to coordinates\+: $ \frac{d^2R_i}{d \zeta_\alpha d \zeta_\beta}$ = ddrdzeta(alpha,beta,i). Evaluated at current time. By default, we use a central-\/difference scheme. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{virtual}} \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{void}} \mbox{\hyperlink{classoomph_1_1GeomObject_a4fdbd372e26d4486026c06dcfdaafe81}{d2position}} (\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}} \mbox{\hyperlink{classoomph_1_1Vector}{Vector}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{zeta}}, \mbox{\hyperlink{classoomph_1_1Vector}{Vector}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{r}}, \mbox{\hyperlink{classoomph_1_1DenseMatrix}{Dense\+Matrix}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{drdzeta}}, \mbox{\hyperlink{classoomph_1_1RankThreeTensor}{Rank\+Three\+Tensor}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{ddrdzeta}}) \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}}
 \begin{DoxyCompactList}\small\item\em Posn \doxylink{classoomph_1_1Vector}{Vector} and its 1st \& 2nd derivatives w.\+r.\+t. to coordinates\+: $ \frac{dR_i}{d \zeta_\alpha}$ = drdzeta(alpha,i). $ \frac{d^2R_i}{d \zeta_\alpha d \zeta_\beta}$ = ddrdzeta(alpha,beta,i). Evaluated at current time. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsubsection*{Additional Inherited Members}
@@ -860,7 +868,7 @@ template$<$$>$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement
 class oomph\+::\+Generalised\+Newtonian\+Projectable\+Axisymmetric\+Crouzeix\+Raviart\+Element$<$ CROUZEIX\+\_\+\+RAVIART\+\_\+\+ELEMENT $>$}
 Crouzeix Raviart upgraded to become projectable. 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02137}{2137}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02095}{2095}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 
@@ -882,7 +890,7 @@ Implements \mbox{\hyperlink{classoomph_1_1ProjectableElementBase_a2292bd9c58694f
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02147}{2147}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02105}{2105}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 
@@ -905,7 +913,7 @@ Implements \mbox{\hyperlink{classoomph_1_1ProjectableElementBase_ae4da5b565b6d33
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02246}{2246}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02204}{2204}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 
@@ -928,7 +936,7 @@ Implements \mbox{\hyperlink{classoomph_1_1ProjectableElementBase_ad45c21b58c0985
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02211}{2211}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02169}{2169}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 
@@ -951,7 +959,7 @@ Implements \mbox{\hyperlink{classoomph_1_1ProjectableElementBase_ac5c27ae929ff63
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02281}{2281}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02239}{2239}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 
@@ -974,7 +982,7 @@ Implements \mbox{\hyperlink{classoomph_1_1ProjectableElementBase_a44634aa4049332
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02182}{2182}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02140}{2140}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 \Hypertarget{classoomph_1_1GeneralisedNewtonianProjectableAxisymmetricCrouzeixRaviartElement_a551405a5bd38e4d945e29a7dae405f8e}\label{classoomph_1_1GeneralisedNewtonianProjectableAxisymmetricCrouzeixRaviartElement_a551405a5bd38e4d945e29a7dae405f8e} 
 \index{oomph::GeneralisedNewtonianProjectableAxisymmetricCrouzeixRaviartElement$<$ CROUZEIX\_RAVIART\_ELEMENT $>$@{oomph::GeneralisedNewtonianProjectableAxisymmetricCrouzeixRaviartElement$<$ CROUZEIX\_RAVIART\_ELEMENT $>$}!nhistory\_values\_for\_coordinate\_projection@{nhistory\_values\_for\_coordinate\_projection}}
@@ -993,7 +1001,7 @@ Implements \mbox{\hyperlink{classoomph_1_1ProjectableElementBase_ab4ecd0cd24000a
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02204}{2204}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02162}{2162}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 
@@ -1016,7 +1024,7 @@ Implements \mbox{\hyperlink{classoomph_1_1ProjectableElementBase_ac6790f394630b9
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02190}{2190}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02148}{2148}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 
@@ -1039,7 +1047,7 @@ Implements \mbox{\hyperlink{classoomph_1_1ProjectableElementBase_a1a9a6de16f3511
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02267}{2267}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source_l02225}{2225}} of file \mbox{\hyperlink{generalised__newtonian__axisym__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+axisym\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 

@@ -646,10 +646,18 @@ std\+::string \mbox{\hyperlink{classoomph_1_1GeneralisedNewtonianNavierStokesEqu
 \begin{DoxyCompactList}\small\item\em Access function for pointer to time stepper\+: Null if object is not time-\/dependent. Const version. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{virtual}} \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{void}} \mbox{\hyperlink{classoomph_1_1GeomObject_af5736db11f3a40daa1a9b3d4859ca061}{position}} (\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}} \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} \&\mbox{\hyperlink{cfortran_8h_af6f0bd3dc13317f895c91323c25c2b8f}{t}}, \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}} \mbox{\hyperlink{classoomph_1_1Vector}{Vector}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{zeta}}, \mbox{\hyperlink{classoomph_1_1Vector}{Vector}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{r}}) \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}}
 \begin{DoxyCompactList}\small\item\em Parametrised position on object\+: r(zeta). Evaluated at the continuous time value, t. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} \& \mbox{\hyperlink{classoomph_1_1GeomObject_a73954a1aa1911f6b7ab6e062731df033}{first\+\_\+derivative\+\_\+fd\+\_\+step}} ()
+\begin{DoxyCompactList}\small\item\em Return a non-\/const reference to the FD step size for the first derivative, allowing modification of the value. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} \mbox{\hyperlink{classoomph_1_1GeomObject_a1515c88970b693724f6f05f8cfd93819}{first\+\_\+derivative\+\_\+fd\+\_\+step}} () \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}}
+\begin{DoxyCompactList}\small\item\em Return a const reference to the FD step size for the first derivative, providing read-\/only access. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} \& \mbox{\hyperlink{classoomph_1_1GeomObject_a233868d62dddb18051556ed13bb2b5d2}{second\+\_\+derivative\+\_\+fd\+\_\+step}} ()
+\begin{DoxyCompactList}\small\item\em Return a non-\/const reference to the FD step size for the second derivative, allowing modification of the value. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} \mbox{\hyperlink{classoomph_1_1GeomObject_ad37f9151ec8876097f48c9c260a8fd0c}{second\+\_\+derivative\+\_\+fd\+\_\+step}} () \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}}
+\begin{DoxyCompactList}\small\item\em Return a const reference to the FD step size for the second derivative, providing read-\/only access. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{virtual}} \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{void}} \mbox{\hyperlink{classoomph_1_1GeomObject_a91cd59efcb15971a293914b7b9bd7f75}{dposition}} (\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}} \mbox{\hyperlink{classoomph_1_1Vector}{Vector}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{zeta}}, \mbox{\hyperlink{classoomph_1_1DenseMatrix}{Dense\+Matrix}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{drdzeta}}) \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}}
-\begin{DoxyCompactList}\small\item\em Derivative of position \doxylink{classoomph_1_1Vector}{Vector} w.\+r.\+t. to coordinates\+: $ \frac{dR_i}{d \zeta_\alpha}$ = drdzeta(alpha,i). Evaluated at current time. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em Derivative of position \doxylink{classoomph_1_1Vector}{Vector} w.\+r.\+t. to coordinates\+: $ \frac{dR_i}{d \zeta_\alpha}$ = drdzeta(alpha,i). Evaluated at current time. By default, the finite difference method is employed. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{virtual}} \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{void}} \mbox{\hyperlink{classoomph_1_1GeomObject_a08472dbe196123490ea109762cefd00c}{d2position}} (\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}} \mbox{\hyperlink{classoomph_1_1Vector}{Vector}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{zeta}}, \mbox{\hyperlink{classoomph_1_1RankThreeTensor}{Rank\+Three\+Tensor}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{ddrdzeta}}) \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}}
-\begin{DoxyCompactList}\small\item\em 2nd derivative of position \doxylink{classoomph_1_1Vector}{Vector} w.\+r.\+t. to coordinates\+: $ \frac{d^2R_i}{d \zeta_\alpha d \zeta_\beta}$ = ddrdzeta(alpha,beta,i). Evaluated at current time. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em 2nd derivative of position \doxylink{classoomph_1_1Vector}{Vector} w.\+r.\+t. to coordinates\+: $ \frac{d^2R_i}{d \zeta_\alpha d \zeta_\beta}$ = ddrdzeta(alpha,beta,i). Evaluated at current time. By default, we use a central-\/difference scheme. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{virtual}} \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{void}} \mbox{\hyperlink{classoomph_1_1GeomObject_a4fdbd372e26d4486026c06dcfdaafe81}{d2position}} (\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}} \mbox{\hyperlink{classoomph_1_1Vector}{Vector}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{zeta}}, \mbox{\hyperlink{classoomph_1_1Vector}{Vector}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{r}}, \mbox{\hyperlink{classoomph_1_1DenseMatrix}{Dense\+Matrix}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{drdzeta}}, \mbox{\hyperlink{classoomph_1_1RankThreeTensor}{Rank\+Three\+Tensor}}$<$ \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{double}} $>$ \&\mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{ddrdzeta}}) \mbox{\hyperlink{classoomph_1_1TAdvectionDiffusionReactionElement}{const}}
 \begin{DoxyCompactList}\small\item\em Posn \doxylink{classoomph_1_1Vector}{Vector} and its 1st \& 2nd derivatives w.\+r.\+t. to coordinates\+: $ \frac{dR_i}{d \zeta_\alpha}$ = drdzeta(alpha,i). $ \frac{d^2R_i}{d \zeta_\alpha d \zeta_\beta}$ = ddrdzeta(alpha,beta,i). Evaluated at current time. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classoomph_1_1GeneralisedNewtonianTemplateFreeNavierStokesEquationsBase}{oomph\+::\+Generalised\+Newtonian\+Template\+Free\+Navier\+Stokes\+Equations\+Base}}}
@@ -1227,11 +1235,7 @@ Reimplemented from \mbox{\hyperlink{classoomph_1_1GeneralisedNewtonianQCrouzeixR
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01820}{1820}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
-
-
-
-References \mbox{\hyperlink{cfortran_8h_source_l00603}{i}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01815}{1815}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 \Hypertarget{classoomph_1_1PRefineableGeneralisedNewtonianQCrouzeixRaviartElement_a39b77eaee549ff393e6164bdafa67384}\label{classoomph_1_1PRefineableGeneralisedNewtonianQCrouzeixRaviartElement_a39b77eaee549ff393e6164bdafa67384} 
 \index{oomph::PRefineableGeneralisedNewtonianQCrouzeixRaviartElement$<$ DIM $>$@{oomph::PRefineableGeneralisedNewtonianQCrouzeixRaviartElement$<$ DIM $>$}!dshape\_and\_dtest\_eulerian\_at\_knot\_nst@{dshape\_and\_dtest\_eulerian\_at\_knot\_nst}}
@@ -1249,11 +1253,7 @@ Reimplemented from \mbox{\hyperlink{classoomph_1_1GeneralisedNewtonianQCrouzeixR
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01881}{1881}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
-
-
-
-References \mbox{\hyperlink{cfortran_8h_source_l00603}{i}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01865}{1865}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 \Hypertarget{classoomph_1_1PRefineableGeneralisedNewtonianQCrouzeixRaviartElement_a4cc8b7e4932fe27129f5e6b4dcba07dc}\label{classoomph_1_1PRefineableGeneralisedNewtonianQCrouzeixRaviartElement_a4cc8b7e4932fe27129f5e6b4dcba07dc} 
 \index{oomph::PRefineableGeneralisedNewtonianQCrouzeixRaviartElement$<$ DIM $>$@{oomph::PRefineableGeneralisedNewtonianQCrouzeixRaviartElement$<$ DIM $>$}!dshape\_and\_dtest\_eulerian\_nst@{dshape\_and\_dtest\_eulerian\_nst}}
@@ -1290,7 +1290,7 @@ Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__
 
 
 
-References \mbox{\hyperlink{cfortran_8h_source_l00603}{i}}, and \mbox{\hyperlink{cfortran_8h_source_l00568}{s}}.
+References \mbox{\hyperlink{cfortran_8h_source_l00568}{s}}.
 
 \Hypertarget{classoomph_1_1PRefineableGeneralisedNewtonianQCrouzeixRaviartElement_ae6ce75f02843faf2c8c27fff4f107383}\label{classoomph_1_1PRefineableGeneralisedNewtonianQCrouzeixRaviartElement_ae6ce75f02843faf2c8c27fff4f107383} 
 \index{oomph::PRefineableGeneralisedNewtonianQCrouzeixRaviartElement$<$ DIM $>$@{oomph::PRefineableGeneralisedNewtonianQCrouzeixRaviartElement$<$ DIM $>$}!dshape\_and\_dtest\_eulerian\_nst@{dshape\_and\_dtest\_eulerian\_nst}}
@@ -1308,11 +1308,11 @@ Reimplemented from \mbox{\hyperlink{classoomph_1_1GeneralisedNewtonianQCrouzeixR
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01850}{1850}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01840}{1840}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 
-References \mbox{\hyperlink{cfortran_8h_source_l00603}{i}}, and \mbox{\hyperlink{cfortran_8h_source_l00568}{s}}.
+References \mbox{\hyperlink{cfortran_8h_source_l00568}{s}}.
 
 \Hypertarget{classoomph_1_1PRefineableGeneralisedNewtonianQCrouzeixRaviartElement_aad3e0f421f695de35837393b7520d05a}\label{classoomph_1_1PRefineableGeneralisedNewtonianQCrouzeixRaviartElement_aad3e0f421f695de35837393b7520d05a} 
 \index{oomph::PRefineableGeneralisedNewtonianQCrouzeixRaviartElement$<$ DIM $>$@{oomph::PRefineableGeneralisedNewtonianQCrouzeixRaviartElement$<$ DIM $>$}!fix\_pressure@{fix\_pressure}}
@@ -1628,7 +1628,7 @@ Reimplemented from \mbox{\hyperlink{classoomph_1_1GeneralisedNewtonianQCrouzeixR
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01910}{1910}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01888}{1888}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 
@@ -1650,7 +1650,7 @@ Reimplemented from \mbox{\hyperlink{classoomph_1_1GeneralisedNewtonianQCrouzeixR
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01965}{1965}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01943}{1943}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 
@@ -1687,7 +1687,7 @@ Reimplemented from \mbox{\hyperlink{classoomph_1_1GeneralisedNewtonianQCrouzeixR
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01943}{1943}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01921}{1921}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 
@@ -1709,7 +1709,7 @@ Reimplemented from \mbox{\hyperlink{classoomph_1_1GeneralisedNewtonianQCrouzeixR
 
 
 
-Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l02003}{2003}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
+Definition at line \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source_l01981}{1981}} of file \mbox{\hyperlink{generalised__newtonian__refineable__navier__stokes__elements_8h_source}{generalised\+\_\+newtonian\+\_\+refineable\+\_\+navier\+\_\+stokes\+\_\+elements.\+h}}.
 
 
 
