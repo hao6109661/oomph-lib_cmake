@@ -816,8 +816,7 @@ namespace oomph
         y_node[i] = tetgen_data.pointlist[3 * i + 1];
         z_node[i] = tetgen_data.pointlist[3 * i + 2];
         const int marker = tetgen_data.pointmarkerlist[i];
-        bound[i] =
-          (marker > 0) ? static_cast<unsigned>(marker) : 0u;
+        bound[i] = (marker > 0) ? static_cast<unsigned>(marker) : 0u;
       }
     }
     // Otherwise no boundary markers
@@ -880,10 +879,9 @@ namespace oomph
 
       if (marker < 0)
       {
-        throw OomphLibError(
-          "Negative TetGen face marker encountered.",
-          OOMPH_CURRENT_FUNCTION,
-          OOMPH_EXCEPTION_LOCATION);
+        throw OomphLibError("Negative TetGen face marker encountered.",
+                            OOMPH_CURRENT_FUNCTION,
+                            OOMPH_EXCEPTION_LOCATION);
       }
 
       face_boundary[i] = static_cast<unsigned>(marker);
@@ -926,7 +924,6 @@ namespace oomph
       }*/
 
 
-
     // Recover boundary-node markers from boundary-face connectivity.
     // TetGen may assign zero or negative point markers to vertices
     // that nevertheless belong to positively marked boundary faces.
@@ -939,8 +936,7 @@ namespace oomph
         continue;
       }
 
-      const unsigned vertex[3] =
-        {first_node[f], second_node[f], third_node[f]};
+      const unsigned vertex[3] = {first_node[f], second_node[f], third_node[f]};
 
       for (unsigned j = 0; j < 3; ++j)
       {
@@ -948,10 +944,9 @@ namespace oomph
 
         if (id == 0 || id > n_node)
         {
-          throw OomphLibError(
-            "Invalid TetGen boundary-face vertex index.",
-            OOMPH_CURRENT_FUNCTION,
-            OOMPH_EXCEPTION_LOCATION);
+          throw OomphLibError("Invalid TetGen boundary-face vertex index.",
+                              OOMPH_CURRENT_FUNCTION,
+                              OOMPH_EXCEPTION_LOCATION);
         }
 
         const unsigned index = id - 1;
