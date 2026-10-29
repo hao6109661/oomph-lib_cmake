@@ -815,7 +815,9 @@ namespace oomph
         x_node[i] = tetgen_data.pointlist[3 * i];
         y_node[i] = tetgen_data.pointlist[3 * i + 1];
         z_node[i] = tetgen_data.pointlist[3 * i + 2];
-        bound[i] = static_cast<unsigned>(tetgen_data.pointmarkerlist[i]);
+        const int marker = tetgen_data.pointmarkerlist[i];
+        bound[i] =
+          (marker > 0) ? static_cast<unsigned>(marker) : 0u;
       }
     }
     // Otherwise no boundary markers
@@ -874,8 +876,17 @@ namespace oomph
       second_node[i] =
         static_cast<unsigned>(tetgen_data.trifacelist[3 * i + 1]);
       third_node[i] = static_cast<unsigned>(tetgen_data.trifacelist[3 * i + 2]);
-      face_boundary[i] =
-        static_cast<unsigned>(tetgen_data.trifacemarkerlist[i]);
+      const int marker = tetgen_data.trifacemarkerlist[i];
+
+      if (marker < 0)
+      {
+        throw OomphLibError(
+          "Negative TetGen face marker encountered.",
+          OOMPH_CURRENT_FUNCTION,
+          OOMPH_EXCEPTION_LOCATION);
+      }
+
+      face_boundary[i] = static_cast<unsigned>(marker);
       if (face_boundary[i] > n_bound)
       {
         n_bound = face_boundary[i];
@@ -915,6 +926,43 @@ namespace oomph
       }*/
 
 
+
+    // Recover boundary-node markers from boundary-face connectivity.
+    // TetGen may assign zero or negative point markers to vertices
+    // that nevertheless belong to positively marked boundary faces.
+    for (unsigned f = 0; f < n_face; ++f)
+    {
+      const unsigned marker = face_boundary[f];
+
+      if (marker == 0)
+      {
+        continue;
+      }
+
+      const unsigned vertex[3] =
+        {first_node[f], second_node[f], third_node[f]};
+
+      for (unsigned j = 0; j < 3; ++j)
+      {
+        const unsigned id = vertex[j];
+
+        if (id == 0 || id > n_node)
+        {
+          throw OomphLibError(
+            "Invalid TetGen boundary-face vertex index.",
+            OOMPH_CURRENT_FUNCTION,
+            OOMPH_EXCEPTION_LOCATION);
+        }
+
+        const unsigned index = id - 1;
+
+        if (bound[index] == 0)
+        {
+          bound[index] = marker;
+        }
+      }
+    }
+
     // Set number of boundaries
     if (n_bound > 0)
     {
@@ -931,7 +979,7 @@ namespace oomph
       // ... -1 because node number begins at 1 in tetgen
       {
         // If the node is on a boundary, construct a boundary node
-        if ((boundary_markers_flag == 1) && (bound[global_node_number - 1] > 0))
+        if (bound[global_node_number - 1] > 0)
         {
           // Construct the boundary ndoe
           Node_pt[global_node_number - 1] =
@@ -968,8 +1016,7 @@ namespace oomph
         // ... -1 because node number begins at 1 in tetgen
         {
           // If we're on a boundary
-          if ((boundary_markers_flag == 1) &&
-              (bound[global_node_number - 1] > 0))
+          if (bound[global_node_number - 1] > 0)
           {
             // Construct the boundary ndoe
             Node_pt[global_node_number - 1] =
@@ -1139,7 +1186,8 @@ namespace oomph
           // Set the face index
           Face_index[e][i] = global_face_index;
           // Allocate the boundary index, if it's a boundary
-          if (global_face_index < n_face)
+          if (global_face_index < n_face &&
+              face_boundary[global_face_index] > 0)
           {
             Face_boundary[e][i] = face_boundary[global_face_index];
             // Add the nodes to the boundary look-up scheme in
@@ -1215,10 +1263,14 @@ namespace oomph
     // Resize the storage
     Edge_boundary.resize(Nglobal_edge, false);
 
-    // Now loop over all the boundary faces and mark that all edges
-    // must also lie on the bounadry
+    // Only positively marked faces represent mesh boundaries.
     for (unsigned i = 0; i < n_face; ++i)
     {
+      if (face_boundary[i] == 0)
+      {
+        continue;
+      }
+
       {
         // Storage for the result of the intersection
         std::vector<unsigned> local_edge_index;
