@@ -425,6 +425,38 @@ TetmeshPoissonProblem<ELEMENT>::TetmeshPoissonProblem()
  // Add sub-mesh
  Problem::mesh_pt()=Bulk_mesh_pt;
 
+ // Diagnose the region attributes assigned by TetGen.
+ //----------------------------------------------------------------
+ oomph_info << "\n===== TetGen region diagnostics =====\n";
+
+ unsigned n_region = Bulk_mesh_pt->nregion();
+
+ oomph_info << "Number of regions: " << n_region << std::endl;
+
+ for (unsigned i = 0; i < n_region; ++i)
+ {
+   double attribute = Bulk_mesh_pt->region_attribute(i);
+   unsigned region_id = static_cast<unsigned>(attribute);
+
+   unsigned n_element =
+     Bulk_mesh_pt->nregion_element(region_id);
+
+   double region_volume = 0.0;
+
+   for (unsigned e = 0; e < n_element; ++e)
+   {
+     region_volume +=
+       Bulk_mesh_pt->region_element_pt(region_id, e)->size();
+   }
+
+   oomph_info << "Region attribute: " << attribute
+              << ", elements: " << n_element
+              << ", volume: " << region_volume
+              << std::endl;
+ }
+
+ oomph_info << "=====================================\n";
+
 
  // Doc average element size; useful information to 
  // relate actual element sizes to the input. Gmsh 

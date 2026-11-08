@@ -78,7 +78,7 @@ namespace oomph
     }
 
     // Dummy nodal attributes
-    unsigned dummy_attribute;
+    double dummy_attribute;
 
     // Element attributes may be used to distinguish internal regions
     // NOTE: This stores doubles because tetgen forces us to!
@@ -95,6 +95,12 @@ namespace oomph
     // Are there attributes?
     unsigned attribute_flag;
     element_file >> attribute_flag;
+    if (attribute_flag > 1)
+    {
+      throw OomphLibError(
+        "The TetGen file reader supports at most one element attribute.",
+        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+    }
 
     // If no attributes
     if (attribute_flag == 0)
@@ -170,10 +176,22 @@ namespace oomph
 
     // Flag for attributes
     node_file >> attribute_flag;
+    if (attribute_flag > 1)
+    {
+      throw OomphLibError(
+        "The TetGen file reader supports at most one point attribute.",
+        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+    }
 
     // Flag for boundary markers
-    unsigned boundary_markers_flag;
-    node_file >> boundary_markers_flag;
+    unsigned node_marker_flag;
+    node_file >> node_marker_flag;
+    if (node_marker_flag > 1)
+    {
+      throw OomphLibError(
+        "Invalid TetGen node marker flag.",
+        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+    }
 
     // Dummy storage for the node number
     unsigned dummy_node_number;
@@ -189,15 +207,30 @@ namespace oomph
     if (attribute_flag == 0)
     {
       // Are there boundary markers
-      if (boundary_markers_flag == 1)
+      if (node_marker_flag == 1)
       {
         for (unsigned i = 0; i < n_node; i++)
         {
           node_file >> dummy_node_number;
+          if (dummy_node_number != i + 1)
+          {
+            throw OomphLibError(
+              "The TetGen file reader requires consecutive one-based node IDs.",
+              OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+          }
           node_file >> x_node[i];
           node_file >> y_node[i];
           node_file >> z_node[i];
-          node_file >> bound[i];
+          int point_marker = 0;
+          node_file >> point_marker;
+          if (point_marker > 0)
+          {
+            bound[i] = static_cast<unsigned>(point_marker);
+          }
+          else
+          {
+            bound[i] = 0;
+          }
         }
         node_file.close();
       }
@@ -207,6 +240,12 @@ namespace oomph
         for (unsigned i = 0; i < n_node; i++)
         {
           node_file >> dummy_node_number;
+          if (dummy_node_number != i + 1)
+          {
+            throw OomphLibError(
+              "The TetGen file reader requires consecutive one-based node IDs.",
+              OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+          }
           node_file >> x_node[i];
           node_file >> y_node[i];
           node_file >> z_node[i];
@@ -218,16 +257,31 @@ namespace oomph
     // Otherwise there are attributes
     else
     {
-      if (boundary_markers_flag == 1)
+      if (node_marker_flag == 1)
       {
         for (unsigned i = 0; i < n_node; i++)
         {
           node_file >> dummy_node_number;
+          if (dummy_node_number != i + 1)
+          {
+            throw OomphLibError(
+              "The TetGen file reader requires consecutive one-based node IDs.",
+              OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+          }
           node_file >> x_node[i];
           node_file >> y_node[i];
           node_file >> z_node[i];
           node_file >> dummy_attribute;
-          node_file >> bound[i];
+          int point_marker = 0;
+          node_file >> point_marker;
+          if (point_marker > 0)
+          {
+            bound[i] = static_cast<unsigned>(point_marker);
+          }
+          else
+          {
+            bound[i] = 0;
+          }
         }
         node_file.close();
       }
@@ -236,6 +290,12 @@ namespace oomph
         for (unsigned i = 0; i < n_node; i++)
         {
           node_file >> dummy_node_number;
+          if (dummy_node_number != i + 1)
+          {
+            throw OomphLibError(
+              "The TetGen file reader requires consecutive one-based node IDs.",
+              OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+          }
           node_file >> x_node[i];
           node_file >> y_node[i];
           node_file >> z_node[i];
@@ -246,10 +306,21 @@ namespace oomph
       }
     }
 
+    // Check every element vertex before indexing the node arrays.
+    for (unsigned i = 0; i < Global_node.size(); ++i)
+    {
+      if (Global_node[i] == 0 || Global_node[i] > n_node)
+      {
+        throw OomphLibError(
+          "Invalid or non-one-based TetGen file vertex index.",
+          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      }
+    }
+
     // Determine highest boundary index
     //------------------------------------
     unsigned n_bound = 0;
-    if (boundary_markers_flag == 1)
+    if (node_marker_flag == 1)
     {
       n_bound = bound[0];
       for (unsigned i = 1; i < n_node; i++)
@@ -283,7 +354,14 @@ namespace oomph
     face_file >> n_face;
 
     // Boundary markers flag
-    face_file >> boundary_markers_flag;
+    unsigned face_marker_flag;
+    face_file >> face_marker_flag;
+    if (face_marker_flag > 1)
+    {
+      throw OomphLibError(
+        "Invalid TetGen face marker flag.",
+        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+    }
 
     // Storage for the global node numbers (in the tetgen 1-based
     // numbering scheme!) of the first, second and third  node in
@@ -310,10 +388,30 @@ namespace oomph
       face_file >> first_node[i];
       face_file >> second_node[i];
       face_file >> third_node[i];
-      face_file >> face_boundary[i];
+      int face_marker = 0;
+      if (face_marker_flag == 1)
+      {
+        face_file >> face_marker;
+      }
+      if (face_marker < 0)
+      {
+        throw OomphLibError(
+          "Unmapped negative face marker in TetGen face file.",
+          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      }
+      face_boundary[i] = static_cast<unsigned>(face_marker);
       if (face_boundary[i] > n_bound)
       {
         n_bound = face_boundary[i];
+      }
+      // The file constructor expects one-based node numbering.
+      if (first_node[i] == 0 || first_node[i] > n_node ||
+          second_node[i] == 0 || second_node[i] > n_node ||
+          third_node[i] == 0 || third_node[i] > n_node)
+      {
+        throw OomphLibError(
+          "Invalid TetGen face file vertex index.",
+          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
       }
       // Add the face index to each node
       node_on_faces[first_node[i]].insert(i);
@@ -322,638 +420,27 @@ namespace oomph
     }
     face_file.close();
 
-    // Set number of boundaries
-    if (n_bound > 0)
-    {
-      this->set_nboundary(n_bound);
-    }
-
-    // Create the elements
-    unsigned counter = 0;
-    for (unsigned e = 0; e < n_element; e++)
-    {
-      Element_pt[e] = new TElement<3, 2>;
-      unsigned global_node_number = Global_node[counter];
-      if (done[global_node_number - 1] == false)
-      // ... -1 because node number begins at 1 in tetgen
-      {
-        // If the node is on a boundary, construct a boundary node
-        if ((boundary_markers_flag == 1) && (bound[global_node_number - 1] > 0))
-        {
-          // Construct the boundary ndoe
-          Node_pt[global_node_number - 1] =
-            finite_element_pt(e)->construct_boundary_node(3);
-
-          // Add to the boundary lookup scheme
-          add_boundary_node(bound[global_node_number - 1] - 1,
-                            Node_pt[global_node_number - 1]);
-        }
-        // Otherwise just construct a normal node
-        else
-        {
-          Node_pt[global_node_number - 1] =
-            finite_element_pt(e)->construct_node(3);
-        }
-
-        done[global_node_number - 1] = true;
-        Node_pt[global_node_number - 1]->x(0) = x_node[global_node_number - 1];
-        Node_pt[global_node_number - 1]->x(1) = y_node[global_node_number - 1];
-        Node_pt[global_node_number - 1]->x(2) = z_node[global_node_number - 1];
-      }
-      // Otherwise just copy the node numbr accross
-      else
-      {
-        finite_element_pt(e)->node_pt(3) = Node_pt[global_node_number - 1];
-      }
-      counter++;
-
-      // Loop over the other nodes
-      for (unsigned j = 0; j < (n_local_node - 1); j++)
-      {
-        global_node_number = Global_node[counter];
-        if (done[global_node_number - 1] == false)
-        // ... -1 because node number begins at 1 in tetgen
-        {
-          // If we're on a boundary
-          if ((boundary_markers_flag == 1) &&
-              (bound[global_node_number - 1] > 0))
-          {
-            // Construct the boundary ndoe
-            Node_pt[global_node_number - 1] =
-              finite_element_pt(e)->construct_boundary_node(j);
-
-            // Add to the boundary lookup scheme
-            add_boundary_node(bound[global_node_number - 1] - 1,
-                              Node_pt[global_node_number - 1]);
-          }
-          else
-          {
-            Node_pt[global_node_number - 1] =
-              finite_element_pt(e)->construct_node(j);
-          }
-          done[global_node_number - 1] = true;
-          Node_pt[global_node_number - 1]->x(0) =
-            x_node[global_node_number - 1];
-          Node_pt[global_node_number - 1]->x(1) =
-            y_node[global_node_number - 1];
-          Node_pt[global_node_number - 1]->x(2) =
-            z_node[global_node_number - 1];
-        }
-        // Otherwise copy the pointer over
-        else
-        {
-          finite_element_pt(e)->node_pt(j) = Node_pt[global_node_number - 1];
-        }
-        counter++;
-      }
-    }
-
-
-    // Resize the "matrix" that stores the boundary id for each
-    // face in each element.
-    Face_boundary.resize(n_element);
-    Face_index.resize(n_element);
-    Edge_index.resize(n_element);
-
-
-    // 0-based index scheme used to construct a global lookup for
-    // each face that will be used to uniquely construct interior
-    // face nodes.
-    // The faces that lie on boundaries will have already been allocated so
-    // we can start from there
-    Nglobal_face = n_face;
-
-    // Storage for the edges associated with each node.
-    // Nodes are indexed using Tetgen's 1-based scheme, which is why
-    // there is a +1 here
-    Vector<std::set<unsigned>> node_on_edges(n_node + 1);
-
-    // 0-based index scheme used to construct a global lookup for each
-    // edge that will be used to uniquely construct interior edge nodes
-    Nglobal_edge = 0;
-
-    // Conversion from the edge numbers to the nodes at the end
-    // of each each edge
-    const unsigned first_local_edge_node[6] = {0, 0, 0, 1, 2, 1};
-    const unsigned second_local_edge_node[6] = {1, 2, 3, 2, 3, 3};
-
-    // Loop over the elements
-    for (unsigned e = 0; e < n_element; e++)
-    {
-      // Each element has four faces
-      Face_boundary[e].resize(4);
-      Face_index[e].resize(4);
-      // By default each face is NOT on a boundary
-      for (unsigned i = 0; i < 4; i++)
-      {
-        Face_boundary[e][i] = 0;
-      }
-
-      Edge_index[e].resize(6);
-
-      // Read out the global node numbers of the nodes from
-      // tetgen's 1-based numbering.
-      // The offset is to match the offset used above
-      const unsigned element_offset = e * n_local_node;
-      unsigned glob_num[4] = {0, 0, 0, 0};
-      for (unsigned i = 0; i < 4; ++i)
-      {
-        glob_num[i] = Global_node[element_offset + ((i + 1) % 4)];
-      }
-
-      // Now we know the global node numbers of the elements' four nodes
-      // in tetgen's 1-based numbering.
-
-      // Determine whether any of the element faces have already been allocated
-      // an index. This may be because they are located on boundaries, or have
-      // already been visited The global index for the i-th face will be stored
-      // in Face_index[i]
-
-      // Loop over the local faces in the element
-      for (unsigned i = 0; i < 4; ++i)
-      {
-        // On the i-th face, our numbering convention is such that
-        // it is the (3-i)th node of the element that is omitted
-        const unsigned omitted_node = 3 - i;
-
-        // Start with the set of global faces associated with the i-th node
-        // which is always on the i-th face
-        std::set<unsigned> input = node_on_faces[glob_num[i]];
-
-        // If there is no data yet, not point doing intersections
-        // the face has not been set up
-        if (input.size() > 0)
-        {
-          // Loop over the other nodes on the face
-          unsigned local_node = i;
-          for (unsigned i2 = 0; i2 < 3; ++i2)
-          {
-            // Create the next node index (mod 4)
-            local_node = (local_node + 1) % 4;
-            // Only take the intersection of nodes on the face
-            // i.e. not 3-i
-            if (local_node != omitted_node)
-            {
-              // Local storage for the intersection
-              std::set<unsigned> intersection_result;
-              // Calculate the intersection of the current input
-              // and next node
-              std::set_intersection(
-                input.begin(),
-                input.end(),
-                node_on_faces[glob_num[local_node]].begin(),
-                node_on_faces[glob_num[local_node]].end(),
-                std::insert_iterator<std::set<unsigned>>(
-                  intersection_result, intersection_result.begin()));
-              // Let the result be the next input
-              input = intersection_result;
-            }
-          }
-        }
-
-        // If the nodes share more than one global face index, then
-        // we have a problem
-        if (input.size() > 1)
-        {
-          throw OomphLibError(
-            "Nodes in scaffold mesh share more than one global face",
-            OOMPH_CURRENT_FUNCTION,
-            OOMPH_EXCEPTION_LOCATION);
-        }
-
-        // If the element's face is not already allocated, the intersection
-        // will be empty
-        if (input.size() == 0)
-        {
-          // Allocate the next global index
-          Face_index[e][i] = Nglobal_face;
-          // Associate the new face index with the nodes
-          for (unsigned i2 = 0; i2 < 4; ++i2)
-          {
-            // Don't add the omitted node
-            if (i2 != omitted_node)
-            {
-              node_on_faces[glob_num[i2]].insert(Nglobal_face);
-            }
-          }
-          // Increment the global face index
-          ++Nglobal_face;
-        }
-        // Otherwise we already have a face
-        else if (input.size() == 1)
-        {
-          const unsigned global_face_index = *input.begin();
-          // Set the face index
-          Face_index[e][i] = global_face_index;
-          // Allocate the boundary index, if it's a boundary
-          if (global_face_index < n_face)
-          {
-            Face_boundary[e][i] = face_boundary[global_face_index];
-            // Add the nodes to the boundary look-up scheme in
-            // oomph-lib (0-based) index
-            for (unsigned i2 = 0; i2 < 4; ++i2)
-            {
-              // Don't add the omitted node
-              if (i2 != omitted_node)
-              {
-                add_boundary_node(face_boundary[global_face_index] - 1,
-                                  Node_pt[glob_num[i2] - 1]);
-              }
-            }
-          }
-        }
-      } // end of loop over the faces
-
-
-      // Loop over the element edges and assign global edge numbers
-      for (unsigned i = 0; i < 6; ++i)
-      {
-        // Storage for the result of the intersection
-        std::vector<unsigned> local_edge_index;
-
-        const unsigned first_global_num = glob_num[first_local_edge_node[i]];
-        const unsigned second_global_num = glob_num[second_local_edge_node[i]];
-
-        // Find the common global edge index for the nodes on
-        // the i-th element edge
-        std::set_intersection(node_on_edges[first_global_num].begin(),
-                              node_on_edges[first_global_num].end(),
-                              node_on_edges[second_global_num].begin(),
-                              node_on_edges[second_global_num].end(),
-                              std::insert_iterator<std::vector<unsigned>>(
-                                local_edge_index, local_edge_index.begin()));
-
-        // If the nodes share more than one global edge index, then
-        // we have a problem
-        if (local_edge_index.size() > 1)
-        {
-          throw OomphLibError(
-            "Nodes in scaffold mesh share more than one global edge",
-            OOMPH_CURRENT_FUNCTION,
-            OOMPH_EXCEPTION_LOCATION);
-        }
-
-        // If the element's edge is not already allocated, the intersection
-        // will be empty
-        if (local_edge_index.size() == 0)
-        {
-          // Allocate the next global index
-          Edge_index[e][i] = Nglobal_edge;
-          // Associate the new edge index with the nodes
-          node_on_edges[first_global_num].insert(Nglobal_edge);
-          node_on_edges[second_global_num].insert(Nglobal_edge);
-          // Increment the global edge index
-          ++Nglobal_edge;
-        }
-        // Otherwise we already have an edge
-        else if (local_edge_index.size() == 1)
-        {
-          // Set the edge index from the result of the intersection
-          Edge_index[e][i] = local_edge_index[0];
-        }
-      }
-
-    } // end for e
-
-
-    // Now determine whether any edges lie on boundaries by using the
-    // face boundary scheme and
-
-    // Resize the storage
-    Edge_boundary.resize(Nglobal_edge, false);
-
-    // Now loop over all the boundary faces and mark that all edges
-    // must also lie on the bounadry
-    for (unsigned i = 0; i < n_face; ++i)
-    {
-      {
-        // Storage for the result of the intersection
-        std::vector<unsigned> local_edge_index;
-
-        // Find the common global edge index for first edge of the face
-        std::set_intersection(node_on_edges[first_node[i]].begin(),
-                              node_on_edges[first_node[i]].end(),
-                              node_on_edges[second_node[i]].begin(),
-                              node_on_edges[second_node[i]].end(),
-                              std::insert_iterator<std::vector<unsigned>>(
-                                local_edge_index, local_edge_index.begin()));
-
-        // If the nodes do not share exactly one global edge index, then
-        // we have a problem
-        if (local_edge_index.size() != 1)
-        {
-          throw OomphLibError(
-            "Nodes in scaffold mesh face do not share exactly one global edge",
-            OOMPH_CURRENT_FUNCTION,
-            OOMPH_EXCEPTION_LOCATION);
-        }
-        else
-        {
-          Edge_boundary[local_edge_index[0]] = true;
-        }
-      }
-
-      {
-        // Storage for the result of the intersection
-        std::vector<unsigned> local_edge_index;
-
-        // Find the common global edge index for second edge of the face
-        std::set_intersection(node_on_edges[second_node[i]].begin(),
-                              node_on_edges[second_node[i]].end(),
-                              node_on_edges[third_node[i]].begin(),
-                              node_on_edges[third_node[i]].end(),
-                              std::insert_iterator<std::vector<unsigned>>(
-                                local_edge_index, local_edge_index.begin()));
-
-        // If the nodes do not share exactly one global edge index, then
-        // we have a problem
-        if (local_edge_index.size() != 1)
-        {
-          throw OomphLibError(
-            "Nodes in scaffold mesh face do not share exactly one global edge",
-            OOMPH_CURRENT_FUNCTION,
-            OOMPH_EXCEPTION_LOCATION);
-        }
-        else
-        {
-          Edge_boundary[local_edge_index[0]] = true;
-        }
-      }
-
-      {
-        // Storage for the result of the intersection
-        std::vector<unsigned> local_edge_index;
-
-        // Find the common global edge index for third edge of the face
-        std::set_intersection(node_on_edges[first_node[i]].begin(),
-                              node_on_edges[first_node[i]].end(),
-                              node_on_edges[third_node[i]].begin(),
-                              node_on_edges[third_node[i]].end(),
-                              std::insert_iterator<std::vector<unsigned>>(
-                                local_edge_index, local_edge_index.begin()));
-
-        // If the nodes do not share exactly one global edge index, then
-        // we have a problem
-        if (local_edge_index.size() != 1)
-        {
-          throw OomphLibError(
-            "Nodes in scaffold mesh face do not share exactly one global edge",
-            OOMPH_CURRENT_FUNCTION,
-            OOMPH_EXCEPTION_LOCATION);
-        }
-        else
-        {
-          Edge_boundary[local_edge_index[0]] = true;
-        }
-      }
-    }
-
-
-  } // end of constructor
-
-
-  //======================================================================
-  /// Constructor: Pass a tetgenio data structure that represents
-  /// the input data of the mesh.
-  /// The assumptions are that the nodes have been assigned boundary
-  /// information which is used in the nodal construction to make sure
-  /// that BoundaryNodes are constructed. Any additional boundaries are
-  /// determined from the face boundary information.
-  //======================================================================
-  TetgenScaffoldMesh::TetgenScaffoldMesh(tetgenio& tetgen_data)
-  {
-    // Find the number of elements
-    unsigned n_element = static_cast<unsigned>(tetgen_data.numberoftetrahedra);
-
-    // Read in number of nodes per element
-    unsigned n_local_node = static_cast<unsigned>(tetgen_data.numberofcorners);
-
-    // Throw an error if we have anything but linear simplices
-    if (n_local_node != 4)
-    {
-      std::ostringstream error_stream;
-      error_stream
-        << "Tetgen should only be used to generate 4-noded tetrahedra!\n"
-        << "Your tetgen input data, contains data for " << n_local_node
-        << "-noded tetrahedra" << std::endl;
-
-      throw OomphLibError(
-        error_stream.str(), OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
-    }
-
-    // Element attributes may be used to distinguish internal regions
-    // NOTE: This stores doubles because tetgen forces us to!
-    Element_attribute.resize(n_element, 0.0);
-
-    // Resize storage for the global node numbers listed element-by-element
-    Global_node.resize(n_element * n_local_node);
-
-    // Initialise (global) node counter
-    unsigned k = 0;
-    // Are there attributes?
-    unsigned attribute_flag =
-      static_cast<unsigned>(tetgen_data.numberoftetrahedronattributes);
-
-    // Read global node numbers for all elements
-    if (attribute_flag == 0)
-    {
-      for (unsigned i = 0; i < n_element; i++)
-      {
-        for (unsigned j = 0; j < n_local_node; j++)
-        {
-          Global_node[k] =
-            static_cast<unsigned>(tetgen_data.tetrahedronlist[k]);
-          k++;
-        }
-      }
-    }
-    // Otherwise read in the attributes as well
-    else
-    {
-      for (unsigned i = 0; i < n_element; i++)
-      {
-        for (unsigned j = 0; j < n_local_node; j++)
-        {
-          Global_node[k] =
-            static_cast<unsigned>(tetgen_data.tetrahedronlist[k]);
-          k++;
-        }
-        Element_attribute[i] = tetgen_data.tetrahedronattributelist[i];
-      }
-    }
-
-    // Resize the Element vector
-    Element_pt.resize(n_element);
-
-    // Read in the number of nodes
-    unsigned n_node = tetgen_data.numberofpoints;
-
-    // Create a vector of boolean so as not to create the same node twice
-    std::vector<bool> done(n_node, false);
-
-    // Resize the Node vector
-    Node_pt.resize(n_node);
-
-    // Flag for boundary markers
-    unsigned boundary_markers_flag = 0;
-    if (tetgen_data.pointmarkerlist != 0)
-    {
-      boundary_markers_flag = 1;
-    }
-
-    // Create storage for nodal positions and boundary markers
-    Vector<double> x_node(n_node);
-    Vector<double> y_node(n_node);
-    Vector<double> z_node(n_node);
-    Vector<unsigned> bound(n_node);
-
-    // We shall ignore all point attributes
-    if (boundary_markers_flag == 1)
-    {
-      for (unsigned i = 0; i < n_node; i++)
-      {
-        x_node[i] = tetgen_data.pointlist[3 * i];
-        y_node[i] = tetgen_data.pointlist[3 * i + 1];
-        z_node[i] = tetgen_data.pointlist[3 * i + 2];
-        const int marker = tetgen_data.pointmarkerlist[i];
-        bound[i] = (marker > 0) ? static_cast<unsigned>(marker) : 0u;
-      }
-    }
-    // Otherwise no boundary markers
-    else
-    {
-      for (unsigned i = 0; i < n_node; i++)
-      {
-        x_node[i] = tetgen_data.pointlist[3 * i];
-        y_node[i] = tetgen_data.pointlist[3 * i + 1];
-        z_node[i] = tetgen_data.pointlist[3 * i + 2];
-        bound[i] = 0;
-      }
-    }
-
-
-    // Determine highest boundary index
-    //------------------------------------
-    unsigned n_bound = 0;
-    if (boundary_markers_flag == 1)
-    {
-      n_bound = bound[0];
-      for (unsigned i = 1; i < n_node; i++)
-      {
-        if (bound[i] > n_bound)
-        {
-          n_bound = bound[i];
-        }
-      }
-    }
-
-    // Now extract face information
-    //---------------------------------
-
-    // Number of faces in face file
-    unsigned n_face = tetgen_data.numberoftrifaces;
-
-    // Storage for the global node numbers (in the tetgen 1-based
-    // numbering scheme!) of the first, second and third  node in
-    //  each segment
-    Vector<unsigned> first_node(n_face);
-    Vector<unsigned> second_node(n_face);
-    Vector<unsigned> third_node(n_face);
-
-    // Storage for the boundary marker for each face
-    Vector<unsigned> face_boundary(n_face);
-
-    // Storage for the (boundary) faces associated with each node.
-    // Nodes are indexed using Tetgen's 1-based scheme, which is why
-    // there is a +1 here
-    Vector<std::set<unsigned>> node_on_faces(n_node + 1);
-
-    // Extract information for each segment
-    for (unsigned i = 0; i < n_face; i++)
-    {
-      first_node[i] = static_cast<unsigned>(tetgen_data.trifacelist[3 * i]);
-      second_node[i] =
-        static_cast<unsigned>(tetgen_data.trifacelist[3 * i + 1]);
-      third_node[i] = static_cast<unsigned>(tetgen_data.trifacelist[3 * i + 2]);
-      const int marker = tetgen_data.trifacemarkerlist[i];
-
-      if (marker < 0)
-      {
-        throw OomphLibError("Negative TetGen face marker encountered.",
-                            OOMPH_CURRENT_FUNCTION,
-                            OOMPH_EXCEPTION_LOCATION);
-      }
-
-      face_boundary[i] = static_cast<unsigned>(marker);
-      if (face_boundary[i] > n_bound)
-      {
-        n_bound = face_boundary[i];
-      }
-      // Add the face index to each node
-      node_on_faces[first_node[i]].insert(i);
-      node_on_faces[second_node[i]].insert(i);
-      node_on_faces[third_node[i]].insert(i);
-    }
-
-    // Extract hole center information
-    // unsigned nhole=tetgen_data.numberofholes;
-    /*if(nhole!=0)
-     {
-      Hole_centre.resize(nhole);
-
-      // Coords counter
-      unsigned count_coords=0;
-
-      // Loop over the holes to get centre coords
-      for(unsigned ihole=0;ihole<nhole;ihole++)
-       {
-        Hole_centre[ihole].resize(3);
-
-        // Read the centre value
-        Hole_centre[ihole][0]=triangle_data.holelist[count_coords];
-        Hole_centre[ihole][1]=triangle_data.holelist[count_coords+1];
-        Hole_centre[ihole][2]=triangle_data.holelist[count_coords+2];
-
-        // Increment coords counter
-        count_coords+=3;
-       }
-     }
-    else
-     {
-      Hole_centre.resize(0);
-      }*/
-
-
-    // Recover boundary-node markers from boundary-face connectivity.
-    // TetGen may assign zero or negative point markers to vertices
-    // that nevertheless belong to positively marked boundary faces.
+    // Recover boundary vertices from positively marked faces.
     for (unsigned f = 0; f < n_face; ++f)
     {
-      const unsigned marker = face_boundary[f];
-
-      if (marker == 0)
+      if (face_boundary[f] == 0)
       {
         continue;
       }
-
-      const unsigned vertex[3] = {first_node[f], second_node[f], third_node[f]};
-
+      const unsigned vertex[3] = {
+        first_node[f], second_node[f], third_node[f]};
       for (unsigned j = 0; j < 3; ++j)
       {
-        const unsigned id = vertex[j];
-
-        if (id == 0 || id > n_node)
+        if (vertex[j] == 0 || vertex[j] > n_node)
         {
-          throw OomphLibError("Invalid TetGen boundary-face vertex index.",
-                              OOMPH_CURRENT_FUNCTION,
-                              OOMPH_EXCEPTION_LOCATION);
+          throw OomphLibError(
+            "Invalid face vertex in TetGen face file.",
+            OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
         }
-
-        const unsigned index = id - 1;
-
+        const unsigned index = vertex[j] - 1;
         if (bound[index] == 0)
         {
-          bound[index] = marker;
+          bound[index] = face_boundary[f];
         }
       }
     }
@@ -1257,6 +744,669 @@ namespace oomph
 
     // Resize the storage
     Edge_boundary.resize(Nglobal_edge, false);
+    Edge_boundary_ids.resize(Nglobal_edge);
+
+    // A global edge is on a boundary if it belongs to a positively
+    // marked face. Keep all its boundary ids.
+    for (unsigned i = 0; i < n_face; ++i)
+    {
+      if (face_boundary[i] == 0)
+      {
+        continue;
+      }
+      {
+        // Storage for the result of the intersection
+        std::vector<unsigned> local_edge_index;
+
+        // Find the common global edge index for first edge of the face
+        std::set_intersection(node_on_edges[first_node[i]].begin(),
+                              node_on_edges[first_node[i]].end(),
+                              node_on_edges[second_node[i]].begin(),
+                              node_on_edges[second_node[i]].end(),
+                              std::insert_iterator<std::vector<unsigned>>(
+                                local_edge_index, local_edge_index.begin()));
+
+        // If the nodes do not share exactly one global edge index, then
+        // we have a problem
+        if (local_edge_index.size() != 1)
+        {
+          throw OomphLibError(
+            "Nodes in scaffold mesh face do not share exactly one global edge",
+            OOMPH_CURRENT_FUNCTION,
+            OOMPH_EXCEPTION_LOCATION);
+        }
+        else
+        {
+          Edge_boundary[local_edge_index[0]] = true;
+          Edge_boundary_ids[local_edge_index[0]].insert(face_boundary[i]);
+        }
+      }
+
+      {
+        // Storage for the result of the intersection
+        std::vector<unsigned> local_edge_index;
+
+        // Find the common global edge index for second edge of the face
+        std::set_intersection(node_on_edges[second_node[i]].begin(),
+                              node_on_edges[second_node[i]].end(),
+                              node_on_edges[third_node[i]].begin(),
+                              node_on_edges[third_node[i]].end(),
+                              std::insert_iterator<std::vector<unsigned>>(
+                                local_edge_index, local_edge_index.begin()));
+
+        // If the nodes do not share exactly one global edge index, then
+        // we have a problem
+        if (local_edge_index.size() != 1)
+        {
+          throw OomphLibError(
+            "Nodes in scaffold mesh face do not share exactly one global edge",
+            OOMPH_CURRENT_FUNCTION,
+            OOMPH_EXCEPTION_LOCATION);
+        }
+        else
+        {
+          Edge_boundary[local_edge_index[0]] = true;
+          Edge_boundary_ids[local_edge_index[0]].insert(face_boundary[i]);
+        }
+      }
+
+      {
+        // Storage for the result of the intersection
+        std::vector<unsigned> local_edge_index;
+
+        // Find the common global edge index for third edge of the face
+        std::set_intersection(node_on_edges[first_node[i]].begin(),
+                              node_on_edges[first_node[i]].end(),
+                              node_on_edges[third_node[i]].begin(),
+                              node_on_edges[third_node[i]].end(),
+                              std::insert_iterator<std::vector<unsigned>>(
+                                local_edge_index, local_edge_index.begin()));
+
+        // If the nodes do not share exactly one global edge index, then
+        // we have a problem
+        if (local_edge_index.size() != 1)
+        {
+          throw OomphLibError(
+            "Nodes in scaffold mesh face do not share exactly one global edge",
+            OOMPH_CURRENT_FUNCTION,
+            OOMPH_EXCEPTION_LOCATION);
+        }
+        else
+        {
+          Edge_boundary[local_edge_index[0]] = true;
+          Edge_boundary_ids[local_edge_index[0]].insert(face_boundary[i]);
+        }
+      }
+    }
+
+
+  } // end of constructor
+
+
+  //======================================================================
+  /// Constructor: Pass a tetgenio data structure that represents
+  /// the input data of the mesh.
+  /// The assumptions are that the nodes have been assigned boundary
+  /// information which is used in the nodal construction to make sure
+  /// that BoundaryNodes are constructed. Any additional boundaries are
+  /// determined from the face boundary information.
+  //======================================================================
+  TetgenScaffoldMesh::TetgenScaffoldMesh(tetgenio& tetgen_data)
+  {
+    // Check the basic TetGen output before accessing its arrays.
+    if (tetgen_data.firstnumber != 0 && tetgen_data.firstnumber != 1)
+    {
+      throw OomphLibError(
+        "TetGen indices must be zero-based or one-based.",
+        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+    }
+    if (tetgen_data.numberofpoints <= 0 ||
+        tetgen_data.numberoftetrahedra <= 0)
+    {
+      throw OomphLibError(
+        "TetGen returned an empty point or tetrahedron list.",
+        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+    }
+    if (tetgen_data.pointlist == nullptr ||
+        tetgen_data.tetrahedronlist == nullptr)
+    {
+      throw OomphLibError(
+        "TetGen returned a null point or tetrahedron array.",
+        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+    }
+    if (tetgen_data.numberofcorners != 4)
+    {
+      throw OomphLibError(
+        "The TetGen scaffold requires four-node tetrahedra.",
+        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+    }
+    if (tetgen_data.numberoftetrahedronattributes < 0 ||
+        tetgen_data.numberoftetrahedronattributes > 1)
+    {
+      throw OomphLibError(
+        "The TetGen scaffold supports zero or one region attribute.",
+        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+    }
+    if (tetgen_data.numberoftetrahedronattributes == 1 &&
+        tetgen_data.tetrahedronattributelist == nullptr)
+    {
+      throw OomphLibError(
+        "TetGen region attributes are missing.",
+        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+    }
+
+    const unsigned n_element =
+      static_cast<unsigned>(tetgen_data.numberoftetrahedra);
+    const unsigned n_local_node = 4;
+    const unsigned n_node =
+      static_cast<unsigned>(tetgen_data.numberofpoints);
+    const int first_number = tetgen_data.firstnumber;
+
+    // Keep the scaffold's internal node numbering one-based.
+    Global_node.resize(n_element * n_local_node);
+    Element_attribute.resize(n_element, 0.0);
+    for (unsigned e = 0; e < n_element; ++e)
+    {
+      for (unsigned j = 0; j < n_local_node; ++j)
+      {
+        const unsigned index = e * n_local_node + j;
+        const int raw_number = tetgen_data.tetrahedronlist[index];
+        const long long node_index =
+          static_cast<long long>(raw_number) -
+          static_cast<long long>(first_number);
+        if (node_index < 0 || node_index >= static_cast<long long>(n_node))
+        {
+          throw OomphLibError(
+            "Invalid TetGen tetrahedron vertex index.",
+            OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+        }
+        Global_node[index] = static_cast<unsigned>(node_index + 1);
+      }
+      if (tetgen_data.numberoftetrahedronattributes == 1)
+      {
+        Element_attribute[e] = tetgen_data.tetrahedronattributelist[e];
+      }
+    }
+
+    // Resize the Element vector
+    Element_pt.resize(n_element);
+
+    // Node count and connectivity have been validated above.
+
+    // Create a vector of boolean so as not to create the same node twice
+    std::vector<bool> done(n_node, false);
+
+    // Resize the Node vector
+    Node_pt.resize(n_node);
+
+    // TetGen 1.6: Use marked faces as the authoritative boundary membership.
+    // Retain point markers only as a fallback when no marked faces exist.
+    std::vector<std::set<unsigned>> node_boundary_ids(n_node);
+    Vector<unsigned> point_boundary_marker(n_node, 0);
+    unsigned n_bound = 0;
+
+    Vector<double> x_node(n_node);
+    Vector<double> y_node(n_node);
+    Vector<double> z_node(n_node);
+    for (unsigned i = 0; i < n_node; ++i)
+    {
+      x_node[i] = tetgen_data.pointlist[3 * i];
+      y_node[i] = tetgen_data.pointlist[3 * i + 1];
+      z_node[i] = tetgen_data.pointlist[3 * i + 2];
+      if (tetgen_data.pointmarkerlist != nullptr)
+      {
+        const int marker = tetgen_data.pointmarkerlist[i];
+        if (marker > 0)
+        {
+          point_boundary_marker[i] = static_cast<unsigned>(marker);
+        }
+      }
+    }
+
+    // Now extract face information
+    //---------------------------------
+
+    // Validate the face arrays before indexing them.
+    if (tetgen_data.numberoftrifaces < 0)
+    {
+      throw OomphLibError(
+        "TetGen returned a negative face count.",
+        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+    }
+    const unsigned n_face =
+      static_cast<unsigned>(tetgen_data.numberoftrifaces);
+    if (n_face > 0)
+    {
+      if (tetgen_data.trifacelist == nullptr ||
+          tetgen_data.trifacemarkerlist == nullptr)
+      {
+        throw OomphLibError(
+          "TetGen face connectivity or boundary markers are missing.",
+          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      }
+    }
+
+    Vector<unsigned> first_node(n_face);
+    Vector<unsigned> second_node(n_face);
+    Vector<unsigned> third_node(n_face);
+    Vector<unsigned> face_boundary(n_face);
+    Vector<std::set<unsigned>> node_on_faces(n_node + 1);
+
+    bool has_marked_boundary_faces = false;
+    for (unsigned f = 0; f < n_face; f++)
+    {
+      const int raw_marker = tetgen_data.trifacemarkerlist[f];
+      if (raw_marker < 0)
+      {
+        // A negative TetGen marker does not identify an oomph-lib
+        // boundary. Fail explicitly rather than silently losing it.
+        throw OomphLibError(
+          "TetGen returned an unmapped negative face marker.",
+          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      }
+      const unsigned marker = static_cast<unsigned>(raw_marker);
+      face_boundary[f] = marker;
+      if (marker > 0)
+      {
+        has_marked_boundary_faces = true;
+      }
+      if (marker > n_bound)
+      {
+        n_bound = marker;
+      }
+
+      unsigned vertex[3] = {0, 0, 0};
+      for (unsigned j = 0; j < 3; ++j)
+      {
+        const int raw_number = tetgen_data.trifacelist[3 * f + j];
+        const long long node_index =
+          static_cast<long long>(raw_number) -
+          static_cast<long long>(first_number);
+        if (node_index < 0 || node_index >= static_cast<long long>(n_node))
+        {
+          throw OomphLibError(
+            "Invalid TetGen face vertex index.",
+            OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+        }
+        vertex[j] = static_cast<unsigned>(node_index + 1);
+        node_on_faces[vertex[j]].insert(f);
+        if (marker > 0)
+        {
+          node_boundary_ids[vertex[j] - 1].insert(marker);
+        }
+      }
+      if (vertex[0] == vertex[1] || vertex[0] == vertex[2] ||
+          vertex[1] == vertex[2])
+      {
+        throw OomphLibError(
+          "Degenerate TetGen face has repeated vertex indices.",
+          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      }
+      first_node[f] = vertex[0];
+      second_node[f] = vertex[1];
+      third_node[f] = vertex[2];
+    }
+
+    // For inputs lacking marked boundary faces, preserve the previous
+    // point-marker behaviour instead of silently dropping all boundaries.
+    if (!has_marked_boundary_faces)
+    {
+      for (unsigned i = 0; i < n_node; i++)
+      {
+        const unsigned boundary_id = point_boundary_marker[i];
+        if (boundary_id > 0)
+        {
+          node_boundary_ids[i].insert(boundary_id);
+          if (boundary_id > n_bound)
+          {
+            n_bound = boundary_id;
+          }
+        }
+      }
+    }
+
+    // Extract hole center information
+    // unsigned nhole=tetgen_data.numberofholes;
+    /*if(nhole!=0)
+     {
+      Hole_centre.resize(nhole);
+
+      // Coords counter
+      unsigned count_coords=0;
+
+      // Loop over the holes to get centre coords
+      for(unsigned ihole=0;ihole<nhole;ihole++)
+       {
+        Hole_centre[ihole].resize(3);
+
+        // Read the centre value
+        Hole_centre[ihole][0]=triangle_data.holelist[count_coords];
+        Hole_centre[ihole][1]=triangle_data.holelist[count_coords+1];
+        Hole_centre[ihole][2]=triangle_data.holelist[count_coords+2];
+
+        // Increment coords counter
+        count_coords+=3;
+       }
+     }
+    else
+     {
+      Hole_centre.resize(0);
+      }*/
+
+
+    // All marked faces have contributed their boundary ids to the
+    // corresponding vertex sets above.
+
+    // Set number of boundaries
+    if (n_bound > 0)
+    {
+      this->set_nboundary(n_bound);
+    }
+
+    // Create the elements
+    unsigned counter = 0;
+    for (unsigned e = 0; e < n_element; e++)
+    {
+      Element_pt[e] = new TElement<3, 2>;
+      unsigned global_node_number = Global_node[counter];
+      if (done[global_node_number - 1] == false)
+      // ... -1 because node number begins at 1 in tetgen
+      {
+        // If the node is on a boundary, construct a boundary node
+        if (!node_boundary_ids[global_node_number - 1].empty())
+        {
+          // Construct the boundary ndoe
+          Node_pt[global_node_number - 1] =
+            finite_element_pt(e)->construct_boundary_node(3);
+
+          // Add to the boundary lookup scheme
+          const std::set<unsigned>& boundary_ids =
+            node_boundary_ids[global_node_number - 1];
+          for (std::set<unsigned>::const_iterator it = boundary_ids.begin();
+               it != boundary_ids.end(); ++it)
+          {
+            add_boundary_node((*it) - 1, Node_pt[global_node_number - 1]);
+          }
+        }
+        // Otherwise just construct a normal node
+        else
+        {
+          Node_pt[global_node_number - 1] =
+            finite_element_pt(e)->construct_node(3);
+        }
+
+        done[global_node_number - 1] = true;
+        Node_pt[global_node_number - 1]->x(0) = x_node[global_node_number - 1];
+        Node_pt[global_node_number - 1]->x(1) = y_node[global_node_number - 1];
+        Node_pt[global_node_number - 1]->x(2) = z_node[global_node_number - 1];
+      }
+      // Otherwise just copy the node numbr accross
+      else
+      {
+        finite_element_pt(e)->node_pt(3) = Node_pt[global_node_number - 1];
+      }
+      counter++;
+
+      // Loop over the other nodes
+      for (unsigned j = 0; j < (n_local_node - 1); j++)
+      {
+        global_node_number = Global_node[counter];
+        if (done[global_node_number - 1] == false)
+        // ... -1 because node number begins at 1 in tetgen
+        {
+          // If we're on a boundary
+          if (!node_boundary_ids[global_node_number - 1].empty())
+          {
+            // Construct the boundary ndoe
+            Node_pt[global_node_number - 1] =
+              finite_element_pt(e)->construct_boundary_node(j);
+
+            // Add to the boundary lookup scheme
+            const std::set<unsigned>& boundary_ids =
+              node_boundary_ids[global_node_number - 1];
+            for (std::set<unsigned>::const_iterator it = boundary_ids.begin();
+                 it != boundary_ids.end(); ++it)
+            {
+              add_boundary_node((*it) - 1, Node_pt[global_node_number - 1]);
+            }
+          }
+          else
+          {
+            Node_pt[global_node_number - 1] =
+              finite_element_pt(e)->construct_node(j);
+          }
+          done[global_node_number - 1] = true;
+          Node_pt[global_node_number - 1]->x(0) =
+            x_node[global_node_number - 1];
+          Node_pt[global_node_number - 1]->x(1) =
+            y_node[global_node_number - 1];
+          Node_pt[global_node_number - 1]->x(2) =
+            z_node[global_node_number - 1];
+        }
+        // Otherwise copy the pointer over
+        else
+        {
+          finite_element_pt(e)->node_pt(j) = Node_pt[global_node_number - 1];
+        }
+        counter++;
+      }
+    }
+
+
+    // Resize the "matrix" that stores the boundary id for each
+    // face in each element.
+    Face_boundary.resize(n_element);
+    Face_index.resize(n_element);
+    Edge_index.resize(n_element);
+
+
+    // 0-based index scheme used to construct a global lookup for
+    // each face that will be used to uniquely construct interior
+    // face nodes.
+    // The faces that lie on boundaries will have already been allocated so
+    // we can start from there
+    Nglobal_face = n_face;
+
+    // Storage for the edges associated with each node.
+    // Nodes are indexed using Tetgen's 1-based scheme, which is why
+    // there is a +1 here
+    Vector<std::set<unsigned>> node_on_edges(n_node + 1);
+
+    // 0-based index scheme used to construct a global lookup for each
+    // edge that will be used to uniquely construct interior edge nodes
+    Nglobal_edge = 0;
+
+    // Conversion from the edge numbers to the nodes at the end
+    // of each each edge
+    const unsigned first_local_edge_node[6] = {0, 0, 0, 1, 2, 1};
+    const unsigned second_local_edge_node[6] = {1, 2, 3, 2, 3, 3};
+
+    // Loop over the elements
+    for (unsigned e = 0; e < n_element; e++)
+    {
+      // Each element has four faces
+      Face_boundary[e].resize(4);
+      Face_index[e].resize(4);
+      // By default each face is NOT on a boundary
+      for (unsigned i = 0; i < 4; i++)
+      {
+        Face_boundary[e][i] = 0;
+      }
+
+      Edge_index[e].resize(6);
+
+      // Read out the global node numbers of the nodes from
+      // tetgen's 1-based numbering.
+      // The offset is to match the offset used above
+      const unsigned element_offset = e * n_local_node;
+      unsigned glob_num[4] = {0, 0, 0, 0};
+      for (unsigned i = 0; i < 4; ++i)
+      {
+        glob_num[i] = Global_node[element_offset + ((i + 1) % 4)];
+      }
+
+      // Now we know the global node numbers of the elements' four nodes
+      // in tetgen's 1-based numbering.
+
+      // Determine whether any of the element faces have already been allocated
+      // an index. This may be because they are located on boundaries, or have
+      // already been visited The global index for the i-th face will be stored
+      // in Face_index[i]
+
+      // Loop over the local faces in the element
+      for (unsigned i = 0; i < 4; ++i)
+      {
+        // On the i-th face, our numbering convention is such that
+        // it is the (3-i)th node of the element that is omitted
+        const unsigned omitted_node = 3 - i;
+
+        // Start with the set of global faces associated with the i-th node
+        // which is always on the i-th face
+        std::set<unsigned> input = node_on_faces[glob_num[i]];
+
+        // If there is no data yet, not point doing intersections
+        // the face has not been set up
+        if (input.size() > 0)
+        {
+          // Loop over the other nodes on the face
+          unsigned local_node = i;
+          for (unsigned i2 = 0; i2 < 3; ++i2)
+          {
+            // Create the next node index (mod 4)
+            local_node = (local_node + 1) % 4;
+            // Only take the intersection of nodes on the face
+            // i.e. not 3-i
+            if (local_node != omitted_node)
+            {
+              // Local storage for the intersection
+              std::set<unsigned> intersection_result;
+              // Calculate the intersection of the current input
+              // and next node
+              std::set_intersection(
+                input.begin(),
+                input.end(),
+                node_on_faces[glob_num[local_node]].begin(),
+                node_on_faces[glob_num[local_node]].end(),
+                std::insert_iterator<std::set<unsigned>>(
+                  intersection_result, intersection_result.begin()));
+              // Let the result be the next input
+              input = intersection_result;
+            }
+          }
+        }
+
+        // If the nodes share more than one global face index, then
+        // we have a problem
+        if (input.size() > 1)
+        {
+          throw OomphLibError(
+            "Nodes in scaffold mesh share more than one global face",
+            OOMPH_CURRENT_FUNCTION,
+            OOMPH_EXCEPTION_LOCATION);
+        }
+
+        // If the element's face is not already allocated, the intersection
+        // will be empty
+        if (input.size() == 0)
+        {
+          // Allocate the next global index
+          Face_index[e][i] = Nglobal_face;
+          // Associate the new face index with the nodes
+          for (unsigned i2 = 0; i2 < 4; ++i2)
+          {
+            // Don't add the omitted node
+            if (i2 != omitted_node)
+            {
+              node_on_faces[glob_num[i2]].insert(Nglobal_face);
+            }
+          }
+          // Increment the global face index
+          ++Nglobal_face;
+        }
+        // Otherwise we already have a face
+        else if (input.size() == 1)
+        {
+          const unsigned global_face_index = *input.begin();
+          // Set the face index
+          Face_index[e][i] = global_face_index;
+          // Allocate the boundary index, if it's a boundary
+          if (global_face_index < n_face &&
+              face_boundary[global_face_index] > 0)
+          {
+            Face_boundary[e][i] = face_boundary[global_face_index];
+            // Add the nodes to the boundary look-up scheme in
+            // oomph-lib (0-based) index
+            for (unsigned i2 = 0; i2 < 4; ++i2)
+            {
+              // Don't add the omitted node
+              if (i2 != omitted_node)
+              {
+                add_boundary_node(face_boundary[global_face_index] - 1,
+                                  Node_pt[glob_num[i2] - 1]);
+              }
+            }
+          }
+        }
+      } // end of loop over the faces
+
+
+      // Loop over the element edges and assign global edge numbers
+      for (unsigned i = 0; i < 6; ++i)
+      {
+        // Storage for the result of the intersection
+        std::vector<unsigned> local_edge_index;
+
+        const unsigned first_global_num = glob_num[first_local_edge_node[i]];
+        const unsigned second_global_num = glob_num[second_local_edge_node[i]];
+
+        // Find the common global edge index for the nodes on
+        // the i-th element edge
+        std::set_intersection(node_on_edges[first_global_num].begin(),
+                              node_on_edges[first_global_num].end(),
+                              node_on_edges[second_global_num].begin(),
+                              node_on_edges[second_global_num].end(),
+                              std::insert_iterator<std::vector<unsigned>>(
+                                local_edge_index, local_edge_index.begin()));
+
+        // If the nodes share more than one global edge index, then
+        // we have a problem
+        if (local_edge_index.size() > 1)
+        {
+          throw OomphLibError(
+            "Nodes in scaffold mesh share more than one global edge",
+            OOMPH_CURRENT_FUNCTION,
+            OOMPH_EXCEPTION_LOCATION);
+        }
+
+        // If the element's edge is not already allocated, the intersection
+        // will be empty
+        if (local_edge_index.size() == 0)
+        {
+          // Allocate the next global index
+          Edge_index[e][i] = Nglobal_edge;
+          // Associate the new edge index with the nodes
+          node_on_edges[first_global_num].insert(Nglobal_edge);
+          node_on_edges[second_global_num].insert(Nglobal_edge);
+          // Increment the global edge index
+          ++Nglobal_edge;
+        }
+        // Otherwise we already have an edge
+        else if (local_edge_index.size() == 1)
+        {
+          // Set the edge index from the result of the intersection
+          Edge_index[e][i] = local_edge_index[0];
+        }
+      }
+
+    } // end for e
+
+
+    // Now determine whether any edges lie on boundaries by using the
+    // face boundary scheme and
+
+    // Resize the storage
+    Edge_boundary.resize(Nglobal_edge, false);
+    Edge_boundary_ids.resize(Nglobal_edge);
 
     // Only positively marked faces represent mesh boundaries.
     for (unsigned i = 0; i < n_face; ++i)
@@ -1290,6 +1440,7 @@ namespace oomph
         else
         {
           Edge_boundary[local_edge_index[0]] = true;
+          Edge_boundary_ids[local_edge_index[0]].insert(face_boundary[i]);
         }
       }
 
@@ -1317,6 +1468,7 @@ namespace oomph
         else
         {
           Edge_boundary[local_edge_index[0]] = true;
+          Edge_boundary_ids[local_edge_index[0]].insert(face_boundary[i]);
         }
       }
 
@@ -1344,6 +1496,7 @@ namespace oomph
         else
         {
           Edge_boundary[local_edge_index[0]] = true;
+          Edge_boundary_ids[local_edge_index[0]].insert(face_boundary[i]);
         }
       }
     }

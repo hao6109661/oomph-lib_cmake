@@ -649,6 +649,23 @@ namespace oomph
       old_nodal_posn[nod_pt] = x;
     }
 
+    // Diagnostic: Count invalid elements before geometric snapping.
+    // Do not alter the mesh or suppress the existing Jacobian checks.
+    unsigned n_invalid_elements_before_snapping = 0;
+    const unsigned n_element_before_snapping = nelement();
+    for (unsigned e = 0; e < n_element_before_snapping; e++)
+    {
+      bool passed = true;
+      finite_element_pt(e)->check_J_eulerian_at_knots(passed);
+      if (!passed)
+      {
+        n_invalid_elements_before_snapping++;
+      }
+    }
+
+    oomph_info << "Elements failing Jacobian check before snapping: "
+               << n_invalid_elements_before_snapping << std::endl;
+
     // Loop over all boundaries
     unsigned n_bound = this->nboundary();
     for (unsigned b = 0; b < n_bound; b++)

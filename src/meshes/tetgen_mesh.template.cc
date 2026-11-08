@@ -37,6 +37,26 @@
 
 namespace oomph
 {
+  //======================================================================
+  /// Copy an optional flat TetGen array into an independently owned array.
+  //======================================================================
+  template<class T>
+  void copy_tetgen_array(const T* source_pt, T*& destination_pt, unsigned n)
+  {
+    if (source_pt != nullptr && n > 0)
+    {
+      destination_pt = new T[n];
+      for (unsigned i = 0; i < n; ++i)
+      {
+        destination_pt[i] = source_pt[i];
+      }
+    }
+    else
+    {
+      destination_pt = nullptr;
+    }
+  }
+
   ///////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////
@@ -245,10 +265,6 @@ namespace oomph
     // Mapping of Tetgen faces to face nodes in the enriched element
     unsigned face_map[4] = {1, 0, 2, 3};
 
-    // Storage for the faces shared by the edges
-    const unsigned faces_on_edge[6][2] = {
-      {0, 1}, {0, 2}, {1, 2}, {0, 3}, {2, 3}, {1, 3}};
-
     // Loop over all elements
     for (unsigned e = 0; e < nelem; e++)
     {
@@ -277,18 +293,11 @@ namespace oomph
           // Find the global edge index
           unsigned edge_index = Tmp_mesh_pt->edge_index(e, j);
 
-          // Use the intersection of the appropriate faces to determine
-          // whether the boundaries on which an edge lies
-          std::set<unsigned> edge_boundaries;
-          for (unsigned i = 0; i < 2; ++i)
-          {
-            unsigned face_boundary_id =
-              Tmp_mesh_pt->face_boundary(e, faces_on_edge[j][i]);
-            if (face_boundary_id > 0)
-            {
-              edge_boundaries.insert(face_boundary_id);
-            }
-          }
+          // Use the global scaffold lookup to ensure that every
+          // quadratic edge node receives all boundary ids, regardless
+          // of which tetrahedron is visited first.
+          const std::set<unsigned> edge_boundaries =
+            Tmp_mesh_pt->edge_boundary_ids(edge_index);
 
           // If the nodes on the edge have not been allocated, construct them
           if (nodes_on_global_edge[edge_index].size() == 0)
@@ -311,7 +320,7 @@ namespace oomph
                 // Add it to the boundaries in the set,
                 // remembering to subtract one to get to the oomph-lib numbering
                 // scheme
-                for (std::set<unsigned>::iterator it = edge_boundaries.begin();
+                for (std::set<unsigned>::const_iterator it = edge_boundaries.begin();
                      it != edge_boundaries.end();
                      ++it)
                 {
@@ -352,7 +361,7 @@ namespace oomph
               // through another element
               // So add again (note that this function will not add to
               // boundaries twice)
-              for (std::set<unsigned>::iterator it = edge_boundaries.begin();
+              for (std::set<unsigned>::const_iterator it = edge_boundaries.begin();
                    it != edge_boundaries.end();
                    ++it)
               {
@@ -952,7 +961,7 @@ namespace oomph
         output_pt->neighborlist = new int[n_tetra * 4];
         for (int n = 0; n < (n_tetra * 4); ++n)
         {
-          output_pt->neighborlist = input_pt->neighborlist;
+          output_pt->neighborlist[n] = input_pt->neighborlist[n];
         }
       }
     } // End of tetrahedron section
@@ -963,6 +972,15 @@ namespace oomph
     if (n_facet > 0)
     {
       output_pt->facetlist = new tetgenio::facet[n_facet];
+      // Initialise every facet before copying any nested allocation.
+      // This also makes destruction safe if an allocation fails.
+      for (int n = 0; n < n_facet; ++n)
+      {
+        output_pt->facetlist[n].polygonlist = nullptr;
+        output_pt->facetlist[n].numberofpolygons = 0;
+        output_pt->facetlist[n].holelist = nullptr;
+        output_pt->facetlist[n].numberofholes = 0;
+      }
       for (int n = 0; n < n_facet; ++n)
       {
         tetgenio::facet* input_f_pt = &input_pt->facetlist[n];
@@ -976,6 +994,11 @@ namespace oomph
         if (n_poly > 0)
         {
           output_f_pt->polygonlist = new tetgenio::polygon[n_poly];
+          for (int p = 0; p < n_poly; ++p)
+          {
+            output_f_pt->polygonlist[p].vertexlist = nullptr;
+            output_f_pt->polygonlist[p].numberofvertices = 0;
+          }
           for (int p = 0; p < n_poly; ++p)
           {
             tetgenio::polygon* output_p_pt = &output_f_pt->polygonlist[p];
@@ -1000,9 +1023,11 @@ namespace oomph
         const int n_hole = output_f_pt->numberofholes;
         if (n_hole > 0)
         {
-          throw OomphLibError("Don't know how to handle holes yet\n",
-                              OOMPH_CURRENT_FUNCTION,
-                              OOMPH_EXCEPTION_LOCATION);
+          output_f_pt->holelist = new double[n_hole * 3];
+          for (int h = 0; h < n_hole * 3; ++h)
+          {
+            output_f_pt->holelist[h] = input_f_pt->holelist[h];
+          }
         }
       } // end of loop over facets
 
@@ -1059,8 +1084,8 @@ namespace oomph
     const int n_seg_const = output_pt->numberofsegmentconstraints;
     if (n_seg_const > 0)
     {
-      output_pt->segmentconstraintlist = new double[n_seg_const * 2];
-      for (int n = 0; n < (n_seg_const * 2); ++n)
+      output_pt->segmentconstraintlist = new double[n_seg_const * 3];
+      for (int n = 0; n < (n_seg_const * 3); ++n)
       {
         output_pt->segmentconstraintlist[n] =
           input_pt->segmentconstraintlist[n];
@@ -1078,10 +1103,14 @@ namespace oomph
         output_pt->trifacelist[n] = input_pt->trifacelist[n];
       }
 
-      output_pt->trifacemarkerlist = new int[n_tri_face];
-      for (int n = 0; n < n_tri_face; ++n)
+      // Face markers are optional in tetgenio.
+      if (input_pt->trifacemarkerlist != nullptr)
       {
-        output_pt->trifacemarkerlist[n] = input_pt->trifacemarkerlist[n];
+        output_pt->trifacemarkerlist = new int[n_tri_face];
+        for (int n = 0; n < n_tri_face; ++n)
+        {
+          output_pt->trifacemarkerlist[n] = input_pt->trifacemarkerlist[n];
+        }
       }
     }
 
@@ -1096,12 +1125,38 @@ namespace oomph
         output_pt->edgelist[n] = input_pt->edgelist[n];
       }
 
-      output_pt->edgemarkerlist = new int[n_edge];
-      for (int n = 0; n < n_edge; ++n)
+      // Edge markers are optional in tetgenio.
+      if (input_pt->edgemarkerlist != nullptr)
       {
-        output_pt->edgemarkerlist[n] = input_pt->edgemarkerlist[n];
+        output_pt->edgemarkerlist = new int[n_edge];
+        for (int n = 0; n < n_edge; ++n)
+        {
+          output_pt->edgemarkerlist[n] = input_pt->edgemarkerlist[n];
+        }
       }
     }
+
+#ifdef OOMPH_HAS_NEW_TETGEN
+    // Copy the extra connectivity arrays in TetGen 1.6.
+    copy_tetgen_array(input_pt->point2tetlist,
+                      output_pt->point2tetlist, n_point);
+    copy_tetgen_array(input_pt->pointparamlist,
+                      output_pt->pointparamlist, n_point);
+    copy_tetgen_array(input_pt->tet2facelist,
+                      output_pt->tet2facelist, n_tetra * 4);
+    copy_tetgen_array(input_pt->tet2edgelist,
+                      output_pt->tet2edgelist, n_tetra * 6);
+    copy_tetgen_array(input_pt->o2facelist,
+                      output_pt->o2facelist, n_tri_face * 3);
+    copy_tetgen_array(input_pt->face2tetlist,
+                      output_pt->face2tetlist, n_tri_face * 2);
+    copy_tetgen_array(input_pt->face2edgelist,
+                      output_pt->face2edgelist, n_tri_face * 3);
+    copy_tetgen_array(input_pt->o2edgelist,
+                      output_pt->o2edgelist, n_edge);
+    copy_tetgen_array(input_pt->edge2tetlist,
+                      output_pt->edge2tetlist, n_edge);
+#endif
   }
 
 } // namespace oomph

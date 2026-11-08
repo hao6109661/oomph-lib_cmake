@@ -26,6 +26,8 @@
 #ifndef OOMPH_TETGEN_SCAFFOLD_MESH_HEADER
 #define OOMPH_TETGEN_SCAFFOLD_MESH_HEADER
 
+#include <set>
+
 #include "mesh.h"
 #include "Telements.h"
 
@@ -90,6 +92,13 @@ namespace oomph
       return Edge_boundary[i];
     }
 
+    /// Return all one-based boundary ids attached to a global edge.
+    /// The set is empty for an interior edge.
+    const std::set<unsigned>& edge_boundary_ids(const unsigned& i) const
+    {
+      return Edge_boundary_ids[i];
+    }
+
     /// Return the global index of the i-th edge in the e-th element:
     /// The global index starts from zero
     unsigned edge_index(const unsigned& e, const unsigned& i) const
@@ -132,6 +141,9 @@ namespace oomph
     /// Vector of booleans to indicate whether a global edge lies
     /// on a boundary
     std::vector<bool> Edge_boundary;
+
+    /// One-based boundary ids associated with every global edge.
+    Vector<std::set<unsigned>> Edge_boundary_ids;
 
     /// Vector of vectors containing the boundary ids of the
     /// elements' faces

@@ -27,6 +27,8 @@
 #ifndef OOMPH_TETGEN_MESH_HEADER
 #define OOMPH_TETGEN_MESH_HEADER
 
+#include <vector>
+
 // Config header
 #ifdef HAVE_CONFIG_H
 #include <oomph-lib-config.h>
@@ -52,6 +54,10 @@ namespace oomph
   public:
     /// Empty constructor
     TetgenMesh()
+      : Tmp_mesh_pt(nullptr),
+        Tetgenio_exists(false),
+        Tetgenio_pt(nullptr),
+        Use_attributes(false)
     {
       // Mesh can only be built with 3D Telements.
       MeshChecker::assert_geometric_element<TElementGeometricBase, ELEMENT>(3);
@@ -369,14 +375,69 @@ namespace oomph
       }
 
       // Now convert to a C-style string
-      char tetswitches[100];
-      snprintf(
-        tetswitches, sizeof(tetswitches), "%s", input_string.str().c_str());
+      const std::string switch_string = input_string.str();
+      std::vector<char> tetswitches(
+        switch_string.begin(), switch_string.end());
+      tetswitches.push_back('\0');
 
       // Make a new tetgen representation
       this->Tetgenio_exists = true;
       Tetgenio_pt = new tetgenio;
-      tetrahedralize(tetswitches, &in, this->Tetgenio_pt);
+      tetrahedralize(tetswitches.data(), &in, this->Tetgenio_pt);
+
+      // Reject malformed output before entering the scaffold constructor.
+      if (Tetgenio_pt->numberofpoints <= 0 ||
+          Tetgenio_pt->numberoftetrahedra <= 0 ||
+          Tetgenio_pt->pointlist == nullptr ||
+          Tetgenio_pt->tetrahedronlist == nullptr)
+      {
+        throw OomphLibError(
+          "TetGen returned incomplete tetrahedral mesh data.",
+          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      }
+
+      
+     // Restore the oomph-lib convention for default region attributes.
+     // TetGen 1.6 assigns automatically generated region attributes
+     // above the largest explicitly specified region attribute.
+     // In oomph-lib, these regions use attribute zero.
+     //---------------------------------------------------------------------
+
+     // Find the largest explicitly specified region attribute
+     double max_explicit_region_attribute = 0.0;
+
+     for (unsigned r = 0; r < static_cast<unsigned>(in.numberofregions); r++)
+     {
+       double attribute = in.regionlist[5 * r + 3];
+
+       if (attribute > max_explicit_region_attribute)
+       {
+         max_explicit_region_attribute = attribute;
+       }
+     }
+
+     // Remap automatically assigned region attributes to zero
+     if ((Tetgenio_pt->numberoftetrahedronattributes == 1) &&
+      (Tetgenio_pt->tetrahedronattributelist != nullptr))
+     {
+       unsigned n_remapped_elements = 0;
+
+       for (unsigned e = 0;
+        e < static_cast<unsigned>(Tetgenio_pt->numberoftetrahedra);
+        e++)
+       {
+         double& attribute = Tetgenio_pt->tetrahedronattributelist[e];
+
+         if (attribute > max_explicit_region_attribute)
+         {
+           attribute = 0.0;
+           n_remapped_elements++;
+         }
+       }
+
+     oomph_info << "Number of elements remapped to default region 0: "
+             << n_remapped_elements << std::endl;
+     }
 
       // Build scaffold
       Tmp_mesh_pt = new TetgenScaffoldMesh(*this->Tetgenio_pt);
@@ -719,15 +780,31 @@ namespace oomph
     /// Set the tetgen pointer by a deep copy
     void set_deep_copy_tetgenio_pt(tetgenio* const& tetgenio_pt)
     {
-      // Delete the existing data
+      if (tetgenio_pt == nullptr)
+      {
+        throw OomphLibError(
+          "Cannot deep copy a null tetgenio pointer.",
+          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      }
+
+      // Complete the copy before releasing the previously owned data.
+      tetgenio* new_tetgenio_pt = new tetgenio;
+      try
+      {
+        this->deep_copy_of_tetgenio(tetgenio_pt, new_tetgenio_pt);
+      }
+      catch (...)
+      {
+        delete new_tetgenio_pt;
+        throw;
+      }
+
       if (Tetgenio_exists)
       {
         delete Tetgenio_pt;
       }
-      this->Tetgenio_pt = new tetgenio;
-      // Create a deep copy of tetgenio_pt and store the result in
-      // Tetgenio_pt
-      this->deep_copy_of_tetgenio(tetgenio_pt, this->Tetgenio_pt);
+      this->Tetgenio_pt = new_tetgenio_pt;
+      Tetgenio_exists = true;
     }
 
     /// Transfer tetgenio data from the input to the output
