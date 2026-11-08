@@ -20,10 +20,10 @@ message(VERBOSE "Entered oomph_tetgen_1.6 subdirectory")
 # Define the sources
 set(SOURCES tetgen.cxx predicates.cxx)
 
-# Use a conservative optimisation level for geometric predicates.
-# Keep this local to the TetGen 1.6 library.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
-   CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+# Use a conservative optimisation level for geometric predicates. Keep this
+# local to the TetGen 1.6 library.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL
+                                           "Clang")
   set_source_files_properties(predicates.cxx PROPERTIES COMPILE_FLAGS "-O0")
 endif()
 
