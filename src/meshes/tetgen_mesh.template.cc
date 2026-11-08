@@ -320,7 +320,8 @@ namespace oomph
                 // Add it to the boundaries in the set,
                 // remembering to subtract one to get to the oomph-lib numbering
                 // scheme
-                for (std::set<unsigned>::const_iterator it = edge_boundaries.begin();
+                for (std::set<unsigned>::const_iterator it =
+                       edge_boundaries.begin();
                      it != edge_boundaries.end();
                      ++it)
                 {
@@ -361,7 +362,8 @@ namespace oomph
               // through another element
               // So add again (note that this function will not add to
               // boundaries twice)
-              for (std::set<unsigned>::const_iterator it = edge_boundaries.begin();
+              for (std::set<unsigned>::const_iterator it =
+                     edge_boundaries.begin();
                    it != edge_boundaries.end();
                    ++it)
               {
@@ -1138,24 +1140,22 @@ namespace oomph
 
 #ifdef OOMPH_HAS_NEW_TETGEN
     // Copy the extra connectivity arrays in TetGen 1.6.
-    copy_tetgen_array(input_pt->point2tetlist,
-                      output_pt->point2tetlist, n_point);
-    copy_tetgen_array(input_pt->pointparamlist,
-                      output_pt->pointparamlist, n_point);
-    copy_tetgen_array(input_pt->tet2facelist,
-                      output_pt->tet2facelist, n_tetra * 4);
-    copy_tetgen_array(input_pt->tet2edgelist,
-                      output_pt->tet2edgelist, n_tetra * 6);
-    copy_tetgen_array(input_pt->o2facelist,
-                      output_pt->o2facelist, n_tri_face * 3);
-    copy_tetgen_array(input_pt->face2tetlist,
-                      output_pt->face2tetlist, n_tri_face * 2);
-    copy_tetgen_array(input_pt->face2edgelist,
-                      output_pt->face2edgelist, n_tri_face * 3);
-    copy_tetgen_array(input_pt->o2edgelist,
-                      output_pt->o2edgelist, n_edge);
-    copy_tetgen_array(input_pt->edge2tetlist,
-                      output_pt->edge2tetlist, n_edge);
+    copy_tetgen_array(
+      input_pt->point2tetlist, output_pt->point2tetlist, n_point);
+    copy_tetgen_array(
+      input_pt->pointparamlist, output_pt->pointparamlist, n_point);
+    copy_tetgen_array(
+      input_pt->tet2facelist, output_pt->tet2facelist, n_tetra * 4);
+    copy_tetgen_array(
+      input_pt->tet2edgelist, output_pt->tet2edgelist, n_tetra * 6);
+    copy_tetgen_array(
+      input_pt->o2facelist, output_pt->o2facelist, n_tri_face * 3);
+    copy_tetgen_array(
+      input_pt->face2tetlist, output_pt->face2tetlist, n_tri_face * 2);
+    copy_tetgen_array(
+      input_pt->face2edgelist, output_pt->face2edgelist, n_tri_face * 3);
+    copy_tetgen_array(input_pt->o2edgelist, output_pt->o2edgelist, n_edge);
+    copy_tetgen_array(input_pt->edge2tetlist, output_pt->edge2tetlist, n_edge);
 #endif
   }
 

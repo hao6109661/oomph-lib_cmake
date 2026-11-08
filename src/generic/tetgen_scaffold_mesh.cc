@@ -99,7 +99,8 @@ namespace oomph
     {
       throw OomphLibError(
         "The TetGen file reader supports at most one element attribute.",
-        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+        OOMPH_CURRENT_FUNCTION,
+        OOMPH_EXCEPTION_LOCATION);
     }
 
     // If no attributes
@@ -180,7 +181,8 @@ namespace oomph
     {
       throw OomphLibError(
         "The TetGen file reader supports at most one point attribute.",
-        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+        OOMPH_CURRENT_FUNCTION,
+        OOMPH_EXCEPTION_LOCATION);
     }
 
     // Flag for boundary markers
@@ -188,9 +190,9 @@ namespace oomph
     node_file >> node_marker_flag;
     if (node_marker_flag > 1)
     {
-      throw OomphLibError(
-        "Invalid TetGen node marker flag.",
-        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      throw OomphLibError("Invalid TetGen node marker flag.",
+                          OOMPH_CURRENT_FUNCTION,
+                          OOMPH_EXCEPTION_LOCATION);
     }
 
     // Dummy storage for the node number
@@ -216,7 +218,8 @@ namespace oomph
           {
             throw OomphLibError(
               "The TetGen file reader requires consecutive one-based node IDs.",
-              OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+              OOMPH_CURRENT_FUNCTION,
+              OOMPH_EXCEPTION_LOCATION);
           }
           node_file >> x_node[i];
           node_file >> y_node[i];
@@ -244,7 +247,8 @@ namespace oomph
           {
             throw OomphLibError(
               "The TetGen file reader requires consecutive one-based node IDs.",
-              OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+              OOMPH_CURRENT_FUNCTION,
+              OOMPH_EXCEPTION_LOCATION);
           }
           node_file >> x_node[i];
           node_file >> y_node[i];
@@ -266,7 +270,8 @@ namespace oomph
           {
             throw OomphLibError(
               "The TetGen file reader requires consecutive one-based node IDs.",
-              OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+              OOMPH_CURRENT_FUNCTION,
+              OOMPH_EXCEPTION_LOCATION);
           }
           node_file >> x_node[i];
           node_file >> y_node[i];
@@ -294,7 +299,8 @@ namespace oomph
           {
             throw OomphLibError(
               "The TetGen file reader requires consecutive one-based node IDs.",
-              OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+              OOMPH_CURRENT_FUNCTION,
+              OOMPH_EXCEPTION_LOCATION);
           }
           node_file >> x_node[i];
           node_file >> y_node[i];
@@ -313,7 +319,8 @@ namespace oomph
       {
         throw OomphLibError(
           "Invalid or non-one-based TetGen file vertex index.",
-          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+          OOMPH_CURRENT_FUNCTION,
+          OOMPH_EXCEPTION_LOCATION);
       }
     }
 
@@ -358,9 +365,9 @@ namespace oomph
     face_file >> face_marker_flag;
     if (face_marker_flag > 1)
     {
-      throw OomphLibError(
-        "Invalid TetGen face marker flag.",
-        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      throw OomphLibError("Invalid TetGen face marker flag.",
+                          OOMPH_CURRENT_FUNCTION,
+                          OOMPH_EXCEPTION_LOCATION);
     }
 
     // Storage for the global node numbers (in the tetgen 1-based
@@ -397,7 +404,8 @@ namespace oomph
       {
         throw OomphLibError(
           "Unmapped negative face marker in TetGen face file.",
-          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+          OOMPH_CURRENT_FUNCTION,
+          OOMPH_EXCEPTION_LOCATION);
       }
       face_boundary[i] = static_cast<unsigned>(face_marker);
       if (face_boundary[i] > n_bound)
@@ -405,13 +413,13 @@ namespace oomph
         n_bound = face_boundary[i];
       }
       // The file constructor expects one-based node numbering.
-      if (first_node[i] == 0 || first_node[i] > n_node ||
-          second_node[i] == 0 || second_node[i] > n_node ||
-          third_node[i] == 0 || third_node[i] > n_node)
+      if (first_node[i] == 0 || first_node[i] > n_node || second_node[i] == 0 ||
+          second_node[i] > n_node || third_node[i] == 0 ||
+          third_node[i] > n_node)
       {
-        throw OomphLibError(
-          "Invalid TetGen face file vertex index.",
-          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+        throw OomphLibError("Invalid TetGen face file vertex index.",
+                            OOMPH_CURRENT_FUNCTION,
+                            OOMPH_EXCEPTION_LOCATION);
       }
       // Add the face index to each node
       node_on_faces[first_node[i]].insert(i);
@@ -427,15 +435,14 @@ namespace oomph
       {
         continue;
       }
-      const unsigned vertex[3] = {
-        first_node[f], second_node[f], third_node[f]};
+      const unsigned vertex[3] = {first_node[f], second_node[f], third_node[f]};
       for (unsigned j = 0; j < 3; ++j)
       {
         if (vertex[j] == 0 || vertex[j] > n_node)
         {
-          throw OomphLibError(
-            "Invalid face vertex in TetGen face file.",
-            OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+          throw OomphLibError("Invalid face vertex in TetGen face file.",
+                              OOMPH_CURRENT_FUNCTION,
+                              OOMPH_EXCEPTION_LOCATION);
         }
         const unsigned index = vertex[j] - 1;
         if (bound[index] == 0)
@@ -856,50 +863,49 @@ namespace oomph
     // Check the basic TetGen output before accessing its arrays.
     if (tetgen_data.firstnumber != 0 && tetgen_data.firstnumber != 1)
     {
-      throw OomphLibError(
-        "TetGen indices must be zero-based or one-based.",
-        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      throw OomphLibError("TetGen indices must be zero-based or one-based.",
+                          OOMPH_CURRENT_FUNCTION,
+                          OOMPH_EXCEPTION_LOCATION);
     }
-    if (tetgen_data.numberofpoints <= 0 ||
-        tetgen_data.numberoftetrahedra <= 0)
+    if (tetgen_data.numberofpoints <= 0 || tetgen_data.numberoftetrahedra <= 0)
     {
-      throw OomphLibError(
-        "TetGen returned an empty point or tetrahedron list.",
-        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      throw OomphLibError("TetGen returned an empty point or tetrahedron list.",
+                          OOMPH_CURRENT_FUNCTION,
+                          OOMPH_EXCEPTION_LOCATION);
     }
     if (tetgen_data.pointlist == nullptr ||
         tetgen_data.tetrahedronlist == nullptr)
     {
-      throw OomphLibError(
-        "TetGen returned a null point or tetrahedron array.",
-        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      throw OomphLibError("TetGen returned a null point or tetrahedron array.",
+                          OOMPH_CURRENT_FUNCTION,
+                          OOMPH_EXCEPTION_LOCATION);
     }
     if (tetgen_data.numberofcorners != 4)
     {
-      throw OomphLibError(
-        "The TetGen scaffold requires four-node tetrahedra.",
-        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      throw OomphLibError("The TetGen scaffold requires four-node tetrahedra.",
+                          OOMPH_CURRENT_FUNCTION,
+                          OOMPH_EXCEPTION_LOCATION);
     }
     if (tetgen_data.numberoftetrahedronattributes < 0 ||
         tetgen_data.numberoftetrahedronattributes > 1)
     {
       throw OomphLibError(
         "The TetGen scaffold supports zero or one region attribute.",
-        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+        OOMPH_CURRENT_FUNCTION,
+        OOMPH_EXCEPTION_LOCATION);
     }
     if (tetgen_data.numberoftetrahedronattributes == 1 &&
         tetgen_data.tetrahedronattributelist == nullptr)
     {
-      throw OomphLibError(
-        "TetGen region attributes are missing.",
-        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      throw OomphLibError("TetGen region attributes are missing.",
+                          OOMPH_CURRENT_FUNCTION,
+                          OOMPH_EXCEPTION_LOCATION);
     }
 
     const unsigned n_element =
       static_cast<unsigned>(tetgen_data.numberoftetrahedra);
     const unsigned n_local_node = 4;
-    const unsigned n_node =
-      static_cast<unsigned>(tetgen_data.numberofpoints);
+    const unsigned n_node = static_cast<unsigned>(tetgen_data.numberofpoints);
     const int first_number = tetgen_data.firstnumber;
 
     // Keep the scaffold's internal node numbering one-based.
@@ -911,14 +917,13 @@ namespace oomph
       {
         const unsigned index = e * n_local_node + j;
         const int raw_number = tetgen_data.tetrahedronlist[index];
-        const long long node_index =
-          static_cast<long long>(raw_number) -
-          static_cast<long long>(first_number);
+        const long long node_index = static_cast<long long>(raw_number) -
+                                     static_cast<long long>(first_number);
         if (node_index < 0 || node_index >= static_cast<long long>(n_node))
         {
-          throw OomphLibError(
-            "Invalid TetGen tetrahedron vertex index.",
-            OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+          throw OomphLibError("Invalid TetGen tetrahedron vertex index.",
+                              OOMPH_CURRENT_FUNCTION,
+                              OOMPH_EXCEPTION_LOCATION);
         }
         Global_node[index] = static_cast<unsigned>(node_index + 1);
       }
@@ -969,12 +974,11 @@ namespace oomph
     // Validate the face arrays before indexing them.
     if (tetgen_data.numberoftrifaces < 0)
     {
-      throw OomphLibError(
-        "TetGen returned a negative face count.",
-        OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+      throw OomphLibError("TetGen returned a negative face count.",
+                          OOMPH_CURRENT_FUNCTION,
+                          OOMPH_EXCEPTION_LOCATION);
     }
-    const unsigned n_face =
-      static_cast<unsigned>(tetgen_data.numberoftrifaces);
+    const unsigned n_face = static_cast<unsigned>(tetgen_data.numberoftrifaces);
     if (n_face > 0)
     {
       if (tetgen_data.trifacelist == nullptr ||
@@ -982,7 +986,8 @@ namespace oomph
       {
         throw OomphLibError(
           "TetGen face connectivity or boundary markers are missing.",
-          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+          OOMPH_CURRENT_FUNCTION,
+          OOMPH_EXCEPTION_LOCATION);
       }
     }
 
@@ -1000,9 +1005,9 @@ namespace oomph
       {
         // A negative TetGen marker does not identify an oomph-lib
         // boundary. Fail explicitly rather than silently losing it.
-        throw OomphLibError(
-          "TetGen returned an unmapped negative face marker.",
-          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+        throw OomphLibError("TetGen returned an unmapped negative face marker.",
+                            OOMPH_CURRENT_FUNCTION,
+                            OOMPH_EXCEPTION_LOCATION);
       }
       const unsigned marker = static_cast<unsigned>(raw_marker);
       face_boundary[f] = marker;
@@ -1019,14 +1024,13 @@ namespace oomph
       for (unsigned j = 0; j < 3; ++j)
       {
         const int raw_number = tetgen_data.trifacelist[3 * f + j];
-        const long long node_index =
-          static_cast<long long>(raw_number) -
-          static_cast<long long>(first_number);
+        const long long node_index = static_cast<long long>(raw_number) -
+                                     static_cast<long long>(first_number);
         if (node_index < 0 || node_index >= static_cast<long long>(n_node))
         {
-          throw OomphLibError(
-            "Invalid TetGen face vertex index.",
-            OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+          throw OomphLibError("Invalid TetGen face vertex index.",
+                              OOMPH_CURRENT_FUNCTION,
+                              OOMPH_EXCEPTION_LOCATION);
         }
         vertex[j] = static_cast<unsigned>(node_index + 1);
         node_on_faces[vertex[j]].insert(f);
@@ -1040,7 +1044,8 @@ namespace oomph
       {
         throw OomphLibError(
           "Degenerate TetGen face has repeated vertex indices.",
-          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+          OOMPH_CURRENT_FUNCTION,
+          OOMPH_EXCEPTION_LOCATION);
       }
       first_node[f] = vertex[0];
       second_node[f] = vertex[1];
@@ -1123,7 +1128,8 @@ namespace oomph
           const std::set<unsigned>& boundary_ids =
             node_boundary_ids[global_node_number - 1];
           for (std::set<unsigned>::const_iterator it = boundary_ids.begin();
-               it != boundary_ids.end(); ++it)
+               it != boundary_ids.end();
+               ++it)
           {
             add_boundary_node((*it) - 1, Node_pt[global_node_number - 1]);
           }
@@ -1165,7 +1171,8 @@ namespace oomph
             const std::set<unsigned>& boundary_ids =
               node_boundary_ids[global_node_number - 1];
             for (std::set<unsigned>::const_iterator it = boundary_ids.begin();
-                 it != boundary_ids.end(); ++it)
+                 it != boundary_ids.end();
+                 ++it)
             {
               add_boundary_node((*it) - 1, Node_pt[global_node_number - 1]);
             }

@@ -376,8 +376,7 @@ namespace oomph
 
       // Now convert to a C-style string
       const std::string switch_string = input_string.str();
-      std::vector<char> tetswitches(
-        switch_string.begin(), switch_string.end());
+      std::vector<char> tetswitches(switch_string.begin(), switch_string.end());
       tetswitches.push_back('\0');
 
       // Make a new tetgen representation
@@ -391,53 +390,53 @@ namespace oomph
           Tetgenio_pt->pointlist == nullptr ||
           Tetgenio_pt->tetrahedronlist == nullptr)
       {
-        throw OomphLibError(
-          "TetGen returned incomplete tetrahedral mesh data.",
-          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+        throw OomphLibError("TetGen returned incomplete tetrahedral mesh data.",
+                            OOMPH_CURRENT_FUNCTION,
+                            OOMPH_EXCEPTION_LOCATION);
       }
 
-      
-     // Restore the oomph-lib convention for default region attributes.
-     // TetGen 1.6 assigns automatically generated region attributes
-     // above the largest explicitly specified region attribute.
-     // In oomph-lib, these regions use attribute zero.
-     //---------------------------------------------------------------------
 
-     // Find the largest explicitly specified region attribute
-     double max_explicit_region_attribute = 0.0;
+      // Restore the oomph-lib convention for default region attributes.
+      // TetGen 1.6 assigns automatically generated region attributes
+      // above the largest explicitly specified region attribute.
+      // In oomph-lib, these regions use attribute zero.
+      //---------------------------------------------------------------------
 
-     for (unsigned r = 0; r < static_cast<unsigned>(in.numberofregions); r++)
-     {
-       double attribute = in.regionlist[5 * r + 3];
+      // Find the largest explicitly specified region attribute
+      double max_explicit_region_attribute = 0.0;
 
-       if (attribute > max_explicit_region_attribute)
-       {
-         max_explicit_region_attribute = attribute;
-       }
-     }
+      for (unsigned r = 0; r < static_cast<unsigned>(in.numberofregions); r++)
+      {
+        double attribute = in.regionlist[5 * r + 3];
 
-     // Remap automatically assigned region attributes to zero
-     if ((Tetgenio_pt->numberoftetrahedronattributes == 1) &&
-      (Tetgenio_pt->tetrahedronattributelist != nullptr))
-     {
-       unsigned n_remapped_elements = 0;
+        if (attribute > max_explicit_region_attribute)
+        {
+          max_explicit_region_attribute = attribute;
+        }
+      }
 
-       for (unsigned e = 0;
-        e < static_cast<unsigned>(Tetgenio_pt->numberoftetrahedra);
-        e++)
-       {
-         double& attribute = Tetgenio_pt->tetrahedronattributelist[e];
+      // Remap automatically assigned region attributes to zero
+      if ((Tetgenio_pt->numberoftetrahedronattributes == 1) &&
+          (Tetgenio_pt->tetrahedronattributelist != nullptr))
+      {
+        unsigned n_remapped_elements = 0;
 
-         if (attribute > max_explicit_region_attribute)
-         {
-           attribute = 0.0;
-           n_remapped_elements++;
-         }
-       }
+        for (unsigned e = 0;
+             e < static_cast<unsigned>(Tetgenio_pt->numberoftetrahedra);
+             e++)
+        {
+          double& attribute = Tetgenio_pt->tetrahedronattributelist[e];
 
-     oomph_info << "Number of elements remapped to default region 0: "
-             << n_remapped_elements << std::endl;
-     }
+          if (attribute > max_explicit_region_attribute)
+          {
+            attribute = 0.0;
+            n_remapped_elements++;
+          }
+        }
+
+        oomph_info << "Number of elements remapped to default region 0: "
+                   << n_remapped_elements << std::endl;
+      }
 
       // Build scaffold
       Tmp_mesh_pt = new TetgenScaffoldMesh(*this->Tetgenio_pt);
@@ -782,9 +781,9 @@ namespace oomph
     {
       if (tetgenio_pt == nullptr)
       {
-        throw OomphLibError(
-          "Cannot deep copy a null tetgenio pointer.",
-          OOMPH_CURRENT_FUNCTION, OOMPH_EXCEPTION_LOCATION);
+        throw OomphLibError("Cannot deep copy a null tetgenio pointer.",
+                            OOMPH_CURRENT_FUNCTION,
+                            OOMPH_EXCEPTION_LOCATION);
       }
 
       // Complete the copy before releasing the previously owned data.
