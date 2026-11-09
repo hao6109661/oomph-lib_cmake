@@ -289,3 +289,18 @@ attempt made no remote changes.
 The remote CI results are not yet available at the time this report is committed.
 The known planar regression difference remains visible, as described above;
 the full CI matrix must not be described as passing without checking its results.
+
+## First remote CI attempt: argument-parser correction
+
+Run 42617401274 failed in all four Ubuntu MPI/TPL configurations before the
+main library was configured or built. The command-line parser rejected
+`--oomph-OOMPH_USE_NEW_TETGEN=ON`; the workflow option had been added without
+registering it in `oomph_build.py`. No numerical self-tests ran in that attempt,
+so these failures do not confirm or contradict the local numerical results.
+Formatting passed.
+
+The correction adds one argument declaration beside the existing TetGen option.
+The existing generic argument-to-CMake mapping already propagates it correctly.
+Both ON and OFF were parsed successfully using the actual `parse_args()`
+function locally, without invoking a build or installation. This is a CI/build
+interface fix and does not change TetGen sources or mesh/solution behaviour.

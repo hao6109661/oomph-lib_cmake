@@ -523,6 +523,7 @@ def parse_args():
     oomph_group.add_argument("--oomph-OOMPH_ENABLE_MUMPS_AS_DEFAULT_LINEAR_SOLVER", metavar="ON/OFF", choices=["ON", "OFF"], help="Use MUMPS as the default solver in oomph-lib.")
     oomph_group.add_argument("--oomph-OOMPH_SUPPRESS_TRIANGLE_LIB", metavar="ON/OFF", choices=["ON", "OFF"], help="Suppress usage of Triangle library.")
     oomph_group.add_argument("--oomph-OOMPH_SUPPRESS_TETGEN_LIB", metavar="ON/OFF", choices=["ON", "OFF"], help="Suppress usage of TetGen library.")
+    oomph_group.add_argument("--oomph-OOMPH_USE_NEW_TETGEN", metavar="ON/OFF", choices=["ON", "OFF"], help="Use bundled TetGen 1.6.1 instead of TetGen 1.4.3.")
     oomph_group.add_argument("--oomph-OOMPH_EXTRA_COMPILE_DEFINES", metavar="DEFINES", help="Additional C/C++ compile defines to pass to the oomph-lib build.")
 
     # Any additional flags for oomph-lib
