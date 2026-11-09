@@ -304,3 +304,12 @@ The existing generic argument-to-CMake mapping already propagates it correctly.
 Both ON and OFF were parsed successfully using the actual `parse_args()`
 function locally, without invoking a build or installation. This is a CI/build
 interface fix and does not change TetGen sources or mesh/solution behaviour.
+
+## Documentation runner consistency
+
+The documentation run 42624860246 used ubuntu-latest, resolved to Ubuntu 26.04,
+and failed to produce acoustic_fsi_annulus/latex/refman.pdf. Its job log does
+not expose the underlying refman.log error, so the precise LaTeX cause is not
+yet established. Pin the documentation workflow to ubuntu-24.04, matching the
+numerical self-tests and the user's requested older Ubuntu environment. This
+changes the runner only, without altering documentation or numerical tests.
