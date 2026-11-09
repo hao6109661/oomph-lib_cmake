@@ -1139,6 +1139,16 @@ namespace oomph
     }
 
 #ifdef OOMPH_HAS_NEW_TETGEN
+    // Copy the additional region and refinement data in TetGen 1.6.1.
+    output_pt->Subdomain_Facets = input_pt->Subdomain_Facets;
+    output_pt->numberofrefineelems = input_pt->numberofrefineelems;
+    copy_tetgen_array(input_pt->refine_elem_list,
+                      output_pt->refine_elem_list,
+                      4 * input_pt->numberofrefineelems);
+    copy_tetgen_array(input_pt->refine_elem_vol_list,
+                      output_pt->refine_elem_vol_list,
+                      input_pt->numberofrefineelems);
+
     // Copy the extra connectivity arrays in TetGen 1.6.
     copy_tetgen_array(
       input_pt->point2tetlist, output_pt->point2tetlist, n_point);

@@ -126,7 +126,13 @@ namespace oomph
 
       // Input string
       std::stringstream input_string_stream;
+#ifdef OOMPH_HAS_NEW_TETGEN
+      // Preserve per-element volume limits after refinement: smoothing
+      // and mesh improvement may otherwise enlarge the refined cells.
+      input_string_stream << "Vq2.0ras/0O//0";
+#else
       input_string_stream << "Vqra";
+#endif
 
       // Convert to a *char
       char tetswitches[100];

@@ -107,6 +107,7 @@ oomph_option(OOMPH_ENABLE_MUMPS_AS_DEFAULT_LINEAR_SOLVER "Use MumpsSolver as the
 # TODO: Discuss with MH; do we actually want these options anymore?
 oomph_option(OOMPH_SUPPRESS_TRIANGLE_LIB "Suppress build of oomph-lib's copy of the triangle library" OFF)
 oomph_option(OOMPH_SUPPRESS_TETGEN_LIB "Suppress build of oomph-lib's copy of the tetgen library" OFF)
+oomph_option(OOMPH_USE_NEW_TETGEN "Use bundled TetGen 1.6.1 instead of TetGen 1.4.3" ON)
 
 # Extra flags for the user to provide
 oomph_option(OOMPH_EXTRA_COMPILE_DEFINES "Additional C/C++ compile defines to pass to the oomph-lib build." "")

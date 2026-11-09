@@ -630,6 +630,117 @@ namespace oomph
   }
 
 
+  namespace
+  {
+    // Repair only interior nodes next to inverted curved elements. Every
+    // prescribed boundary position is retained, and the caller rechecks
+    // all element Jacobians before accepting the mesh.
+    void untangle_curved_tet_mesh(Mesh* mesh_pt)
+    {
+      // Untangle the small remaining patch while preserving all boundaries.
+      auto jacobians = [](FiniteElement* el_pt)
+      {
+        Vector<double> value(el_pt->integral_pt()->nweight());
+        Shape psi(el_pt->nnode());
+        DShape dpsi(el_pt->nnode(), 3);
+        for (unsigned ipt = 0; ipt < value.size(); ipt++)
+        {
+          el_pt->dshape_local_at_knot(ipt, psi, dpsi);
+          double a[3][3] = {};
+          for (unsigned j = 0; j < el_pt->nnode(); j++)
+            for (unsigned i = 0; i < 3; i++)
+              for (unsigned k = 0; k < 3; k++)
+                a[i][k] += el_pt->node_pt(j)->x(i) * dpsi(j, k);
+          value[ipt] = a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1]) -
+                       a[0][1] * (a[1][0] * a[2][2] - a[1][2] * a[2][0]) +
+                       a[0][2] * (a[1][0] * a[2][1] - a[1][1] * a[2][0]);
+        }
+        return value;
+      };
+      std::set<Node*> candidate;
+      for (unsigned e = 0; e < mesh_pt->nelement(); e++)
+      {
+        FiniteElement* el_pt = mesh_pt->finite_element_pt(e);
+        bool valid = true;
+        el_pt->check_J_eulerian_at_knots(valid);
+        if (!valid)
+          for (unsigned j = 0; j < el_pt->nnode(); j++)
+            if (!el_pt->node_pt(j)->is_on_boundary())
+              candidate.insert(el_pt->node_pt(j));
+      }
+      std::map<Node*, Vector<FiniteElement*>> incident;
+      std::map<FiniteElement*, double> scale;
+      for (unsigned e = 0; e < mesh_pt->nelement(); e++)
+      {
+        FiniteElement* el_pt = mesh_pt->finite_element_pt(e);
+        for (unsigned j = 0; j < el_pt->nnode(); j++)
+          if (candidate.count(el_pt->node_pt(j)))
+          {
+            incident[el_pt->node_pt(j)].push_back(el_pt);
+            if (scale.count(el_pt) == 0)
+              for (double value : jacobians(el_pt))
+                scale[el_pt] = std::max(scale[el_pt], std::abs(value));
+          }
+      }
+      auto penalty = [&](Node* node_pt)
+      {
+        double result = 0.0;
+        for (FiniteElement* el_pt : incident[node_pt])
+          for (double value : jacobians(el_pt))
+          {
+            const double violation =
+              std::max(0.0, 1.0e-4 - value / scale[el_pt]);
+            result += violation * violation;
+          }
+        return result;
+      };
+      oomph_info << "Untangling interior nodes: " << candidate.size()
+                 << std::endl;
+      for (unsigned iteration = 0; iteration < 100; iteration++)
+      {
+        bool all_valid = true;
+        for (const auto& entry : scale)
+          for (double value : jacobians(entry.first)) all_valid &= value > 0.0;
+        if (all_valid) break;
+        for (Node* node_pt : candidate)
+        {
+          const double initial_penalty = penalty(node_pt);
+          if (initial_penalty == 0.0) continue;
+          double h = std::cbrt(scale[incident[node_pt][0]]);
+          double delta = h * 1.0e-5;
+          double gradient[3], original[3], norm = 0.0;
+          for (unsigned i = 0; i < 3; i++)
+          {
+            original[i] = node_pt->x(i);
+            node_pt->x(i) = original[i] + delta;
+            const double plus = penalty(node_pt);
+            node_pt->x(i) = original[i] - delta;
+            gradient[i] = (plus - penalty(node_pt)) / (2.0 * delta);
+            node_pt->x(i) = original[i];
+            norm += gradient[i] * gradient[i];
+          }
+          norm = std::sqrt(norm);
+          if (norm == 0.0) continue;
+          double step = h * 0.1;
+          bool accepted = false;
+          for (unsigned trial = 0; trial < 20; trial++)
+          {
+            for (unsigned i = 0; i < 3; i++)
+              node_pt->x(i) = original[i] - step * gradient[i] / norm;
+            if (penalty(node_pt) < initial_penalty)
+            {
+              accepted = true;
+              break;
+            }
+            step *= 0.5;
+          }
+          if (!accepted)
+            for (unsigned i = 0; i < 3; i++) node_pt->x(i) = original[i];
+        }
+      }
+    }
+  } // namespace
+
   //======================================================================
   /// Move the nodes on boundaries with associated Geometric Objects (if any)
   /// so that they exactly coincide with the geometric object. This requires
@@ -940,6 +1051,18 @@ namespace oomph
           }
         }
       }
+    }
+
+    bool needs_untangling = false;
+    for (unsigned e = 0; e < nelement(); e++)
+    {
+      bool valid = true;
+      finite_element_pt(e)->check_J_eulerian_at_knots(valid);
+      needs_untangling |= !valid;
+    }
+    if (needs_untangling)
+    {
+      untangle_curved_tet_mesh(this);
     }
 
     // Check if any element is inverted

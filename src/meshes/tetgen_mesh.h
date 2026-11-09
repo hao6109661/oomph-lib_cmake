@@ -348,7 +348,12 @@ namespace oomph
       // attributes, and the second 'a' switch with the subsequent float sets
       // the global (non-region-specific) element volume constraint.
       std::stringstream input_string;
+#ifdef OOMPH_HAS_NEW_TETGEN
+      // Use the relaxed encroachment angles used by native refinement.
+      input_string << "pq2.0/0/150/172aAa" << element_volume;
+#else
       input_string << "pq2.0aAa" << element_volume;
+#endif
 
       // input_string << "Vpq1.414Aa" << element_volume;
       // << "Q"; // Q for quiet!
@@ -574,81 +579,96 @@ namespace oomph
         }
       }
 
-      // Now the facets
-      unsigned n_outer_facet = outer_boundary_pt->nfacet();
-      tetgen_io.numberoffacets = n_outer_facet;
-      Vector<unsigned> n_inner_facet(n_internal);
-      for (unsigned h = 0; h < n_internal; ++h)
+      // Collect the facets without changing the surfaces used for snapping.
+      Vector<TetMeshFacetedSurface*> surface_pt(1, outer_boundary_pt);
+      Vector<unsigned> vertex_offset(1, 0);
+      for (unsigned h = 0; h < n_internal; h++)
       {
-        n_inner_facet[h] = internal_surface_pt[h]->nfacet();
-        tetgen_io.numberoffacets += n_inner_facet[h];
+        surface_pt.push_back(internal_surface_pt[h]);
+        vertex_offset.push_back(internal_vertex_offset[h]);
       }
-
+      Vector<Vector<unsigned>> facets;
+      Vector<unsigned> facet_marker;
+      for (unsigned h = 0; h < surface_pt.size(); h++)
+      {
+        for (unsigned n = 0; n < surface_pt[h]->nfacet(); n++)
+        {
+          Vector<unsigned> facet = surface_pt[h]->vertex_index_in_tetgen(n);
+          for (unsigned j = 0; j < facet.size(); j++)
+          {
+            facet[j] += vertex_offset[h];
+          }
+          bool split_quad = false;
+#ifdef OOMPH_HAS_NEW_TETGEN
+          // A PLC facet must be planar. Split warped quadrilaterals into
+          // two planar facets, retaining their original boundary marker.
+          if (facet.size() == 4)
+          {
+            double edge[3][3];
+            double scale = 0.0;
+            for (unsigned j = 0; j < 3; j++)
+            {
+              for (unsigned i = 0; i < 3; i++)
+              {
+                edge[j][i] = tetgen_io.pointlist[3 * facet[j + 1] + i] -
+                             tetgen_io.pointlist[3 * facet[0] + i];
+                scale = std::max(scale, std::abs(edge[j][i]));
+              }
+            }
+            const double determinant =
+              edge[0][0] * (edge[1][1] * edge[2][2] - edge[1][2] * edge[2][1]) -
+              edge[0][1] * (edge[1][0] * edge[2][2] - edge[1][2] * edge[2][0]) +
+              edge[0][2] * (edge[1][0] * edge[2][1] - edge[1][1] * edge[2][0]);
+            split_quad =
+              std::abs(determinant) > 1.0e-10 * scale * scale * scale;
+          }
+#endif
+          const unsigned marker = surface_pt[h]->one_based_facet_boundary_id(n);
+          if (split_quad)
+          {
+            const unsigned triangle_vertex[2][3] = {{0, 1, 2}, {0, 2, 3}};
+            for (unsigned t = 0; t < 2; t++)
+            {
+              Vector<unsigned> triangle(3);
+              for (unsigned j = 0; j < 3; j++)
+              {
+                triangle[j] = facet[triangle_vertex[t][j]];
+              }
+              facets.push_back(triangle);
+              facet_marker.push_back(marker);
+            }
+          }
+          else
+          {
+            facets.push_back(facet);
+            facet_marker.push_back(marker);
+          }
+        }
+      }
+      tetgen_io.numberoffacets = facets.size();
       tetgen_io.facetlist = new tetgenio::facet[tetgen_io.numberoffacets];
       tetgen_io.facetmarkerlist = new int[tetgen_io.numberoffacets];
-
-      counter = 0;
-      for (unsigned n = 0; n < n_outer_facet; ++n)
+      for (unsigned n = 0; n < facets.size(); n++)
       {
-        // Set pointer to facet
-        f = &tetgen_io.facetlist[counter];
+        f = &tetgen_io.facetlist[n];
         f->numberofpolygons = 1;
-        f->polygonlist = new tetgenio::polygon[f->numberofpolygons];
+        f->polygonlist = new tetgenio::polygon[1];
         f->numberofholes = 0;
-        f->holelist = NULL;
+        f->holelist = nullptr;
         p = &f->polygonlist[0];
-
-        Vector<unsigned> facet = outer_boundary_pt->vertex_index_in_tetgen(n);
-
-        p->numberofvertices = facet.size();
+        p->numberofvertices = facets[n].size();
         p->vertexlist = new int[p->numberofvertices];
-        for (int i = 0; i < p->numberofvertices; ++i)
+        for (int j = 0; j < p->numberofvertices; j++)
         {
-          // The offset here is because we have insisted on 1-based indexing
-          p->vertexlist[i] = facet[i] + 1;
+          p->vertexlist[j] = facets[n][j] + 1;
         }
-
-        // Set up the boundary markers
-        tetgen_io.facetmarkerlist[counter] =
-          outer_boundary_pt->one_based_facet_boundary_id(n);
-        // Increase the counter
-        ++counter;
+        tetgen_io.facetmarkerlist[n] = facet_marker[n];
       }
 
-      // Initialise the number of holes
       tetgen_io.numberofholes = 0;
-      // and the number of regions
       tetgen_io.numberofregions = 0;
-
-      // Loop over the internal stuff
-      for (unsigned h = 0; h < n_internal; ++h)
+      for (unsigned h = 0; h < n_internal; h++)
       {
-        for (unsigned n = 0; n < n_inner_facet[h]; ++n)
-        {
-          // Set pointer to facet
-          f = &tetgen_io.facetlist[counter];
-          f->numberofpolygons = 1;
-          f->polygonlist = new tetgenio::polygon[f->numberofpolygons];
-          f->numberofholes = 0;
-          f->holelist = NULL;
-          p = &f->polygonlist[0];
-
-          Vector<unsigned> facet =
-            internal_surface_pt[h]->vertex_index_in_tetgen(n);
-
-          p->numberofvertices = facet.size();
-          p->vertexlist = new int[p->numberofvertices];
-          for (int i = 0; i < p->numberofvertices; ++i)
-          {
-            // Add the 1-based and vertex offsets to get these number correct
-            p->vertexlist[i] = facet[i] + internal_vertex_offset[h] + 1;
-          }
-          // Set up the boundary markers
-          tetgen_io.facetmarkerlist[counter] =
-            internal_surface_pt[h]->one_based_facet_boundary_id(n);
-          ++counter;
-        }
-
         // If it's a hole/region add it
         TetMeshFacetedClosedSurface* srf_pt =
           dynamic_cast<TetMeshFacetedClosedSurface*>(internal_surface_pt[h]);

@@ -22,8 +22,7 @@ set(SOURCES tetgen.cxx predicates.cxx)
 
 # Use a conservative optimisation level for geometric predicates. Keep this
 # local to the TetGen 1.6 library.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL
-                                           "Clang")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   set_source_files_properties(predicates.cxx PROPERTIES COMPILE_FLAGS "-O0")
 endif()
 
@@ -39,6 +38,9 @@ oomph_library_config(
   LIBNAME ${LIBNAME}
   HEADERS ${HEADERS}
   SOURCES ${SOURCES})
+
+# Keep the upstream header unchanged and propagate the library interface.
+target_compile_definitions(${LIBNAME} PUBLIC TETLIBRARY)
 
 # Silence the annoying warnings produced by this library
 include(OomphTargetSilenceWarnings)

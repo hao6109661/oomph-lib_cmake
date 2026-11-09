@@ -25,11 +25,9 @@ if(NOT OOMPH_SUPPRESS_TRIANGLE_LIB)
 endif()
 
 # Add Tetgen
+set(OOMPH_HAS_NEW_TETGEN FALSE CACHE INTERNAL "")
 if(NOT OOMPH_SUPPRESS_TETGEN_LIB)
-  # TODO: Move to the latest tetgen
   if(OOMPH_USE_NEW_TETGEN)
-    # NOTE: Builds fine but breaks the meshing/adaptive_tet_meshes/ demo
-    # drivers... Needs further investigation
     add_subdirectory(oomph_tetgen_1.6)
   else()
     add_subdirectory(oomph_tetgen)
